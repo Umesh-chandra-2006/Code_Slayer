@@ -9,6 +9,7 @@ import ViewProblem from "./pages/ViewProblem";
 import SubmissionList from "./pages/SubmissionList";
 import NewProblem  from "./pages/NewProblem";
 import ProblemEdit from "./pages/ProblemEdit";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   return (
@@ -60,6 +61,14 @@ function App() {
         element={
           <PrivateRoute>
             <ProblemEdit />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <PrivateRoute>
+            <ProfilePage />
           </PrivateRoute>
         }
       />
