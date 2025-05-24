@@ -33,7 +33,7 @@ export default function Login() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         navigate("/dashboard");
-        setFormData({ email: "", password: "" }); 
+        setFormData({ email: "", password: "" });
       } else {
         setError(data.message || "Login failed");
       }
@@ -76,6 +76,22 @@ export default function Login() {
 
         <button type="submit">Login</button>
       </form>
+      <p>
+        <button
+          type="button"
+          onClick={() => navigate("/forgot-password")}
+          style={{
+            background: "none",
+            border: "none",
+            color: "blue",
+            cursor: "pointer",
+            textDecoration: "underline",
+            padding: 0,
+          }}
+        >
+          Forgot Password?
+        </button>
+      </p>
     </div>
   );
 }
