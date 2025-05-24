@@ -13,6 +13,7 @@ import ProblemEdit from "./pages/ProblemEdit";
 import ProfilePage from "./pages/ProfilePage";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import CodeEditor from "./pages/CodeEditor";
 
 function App() {
   return (
@@ -75,6 +76,14 @@ function App() {
         element={
           <PrivateRoute>
             <ProfilePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/editor"
+        element={
+          <PrivateRoute>
+            <CodeEditor />
           </PrivateRoute>
         }
       />
