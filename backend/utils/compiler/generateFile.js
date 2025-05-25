@@ -6,9 +6,17 @@ const codesDir = path.join(__dirname, "codes");
 
 if (!fs.existsSync(codesDir)) fs.mkdirSync(codesDir, { recursive: true });
 
-const generateFile = async (format, content) => {
-  const jobID = uuid();
-  const filename = `${jobID}.${format}`;
+
+const generateFile = async (language, content) => {
+
+  let filename;
+  if(language === "java") {
+    filename = `Main.java`;
+  } else {
+    const extMap = { cpp: "cpp", python: "py", javascript: "js" };
+    const extension = extMap[language] || "txt";
+    filename = `${uuid()}.${extension}`;
+  }
   const filepath = path.join(codesDir, filename);
 
   fs.writeFileSync(filepath, content);

@@ -2,3 +2,5 @@
 node_modules/
 /utils/compiler/codes/
 /utils/compiler/outputs/
+/utils/compiler/inputs/
+..vscode/
