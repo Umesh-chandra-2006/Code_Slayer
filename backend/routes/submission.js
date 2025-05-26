@@ -1,25 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Submission = require('../models/Submission');
+const {
+    handleSubmission,
+    getAllSubmissions,
+} = require("../controllers/submissionController");
 
-router.post('/', async (req,res) =>{
-    try {
-        const newsubmission =new Submission(req.body);
-        const saved = await newsubmission.save();
-
-        res.status(201).json(saved);
-    } catch(err) {
-        res.status(500).json({error: "Submission Failed"});
-    }
-});
-
-router.get('/', async (req,res) =>{
-    try {
-        const submissions =new Submissions.find().populate('user','username').populate('problem','title');
-        res.json(submissions);
-    } catch(err) {
-        res.status(500).json({error: "Error fetching Submissions"});
-    }
-});
+router.post("/", handleSubmission);
+router.get("/", getAllSubmissions);
 
 module.exports = router;

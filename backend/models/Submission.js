@@ -4,14 +4,14 @@ const submissionSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   problem: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Prpblem",
+    ref: "Problem",
     required: true,
   },
   code: { type: String, required: true },
   language: { type: String, required: true },
   status: {
     type: String,
-    enum: ["pending", "accepted", "wrong answer", "error"],
+    enum: ["pending", "accepted", "rejected", "error"],
     default: "pending",
   },
   runtime: { type: Number },

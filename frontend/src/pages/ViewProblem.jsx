@@ -1,37 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import CodeEditor from "./CodeEditor";
 
 export default function ViewProblem() {
   const { id } = useParams();
   const [problem, setproblem] = useState(null);
-  const [code,setCode] = useState("");
+  const loggedInUserId = localStorage.getItem("userId");
 
   useEffect(() => {
     const fetchProblems = async () => {
-      const res = await fetch(`http://localhost:5000/api/problems/${id}`);
-      const data = await res.json();
-      setproblem(data);
+      try {
+        const res = await fetch(`http://localhost:5000/api/problems/${id}`);
+        if (!res.ok) throw new Error("Failed to fetch problem");
+        const data = await res.json();
+        setproblem(data);
+      } catch (err) {
+        console.error("Error fetching problem:", err);
+        setproblem(null);
+      }
     };
 
     fetchProblems();
   }, [id]);
 
-  const handleSubmit = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ problemId: id, code }),
-      });
-
-      const result = await res.json();
-      console.log("Result:", result);
-    } catch (err) {
-      console.error("Submission failed", err);
-    }
-  };
-
-  if (!problem) return <p>Loading...</p>;
+  if (!problem) return  <p>Loading problem or problem not found.</p>;
 
   return (
     <div>
@@ -53,15 +45,15 @@ export default function ViewProblem() {
       </p>
 
       <h3> Submit </h3>
-      <textarea
-        rows="10"
-        cols="80"
-        placeholder="Write your code here..."
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
+      <CodeEditor
+        initialCode={`#include <iostream>\nusing namespace std;\nint main() {\n  // your code\n  return 0;\n}`}
+        initialInput={problem.sampleInput || ""}
+        initialLanguage="cpp"
+        hideInputBox={true}
+        userId={loggedInUserId}
+        problemId={problem._id || id}
+        testInput={problem.sampleInput}
       />
-      <br />
-      <button onClick={handleSubmit}> Submit</button>
     </div>
   );
 }
