@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function ProblemEdit() {
@@ -13,25 +13,24 @@ export default function ProblemEdit() {
     sampleOutput: "",
     constraints: "",
     difficulty: "Easy",
+    testCases: [{ input: "", output: "" }],
   });
 
   useEffect(() => {
-    const fetchproblem = async() => {
-        try {
-      const res = await fetch(`http://localhost:5000/api/problems/${id}`);
+    const fetchproblem = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/problems/${id}`);
 
-      if (res.ok) {
-        const data= await res.json();
-        setform(data);
-    }
-        else alert("Failed to fetch problem");
-    } catch (err) {
-      console.error("Error fetching problem:", err);
-    }
+        if (res.ok) {
+          const data = await res.json();
+          setform(data);
+        } else alert("Failed to fetch problem");
+      } catch (err) {
+        console.error("Error fetching problem:", err);
+      }
     };
     fetchproblem();
-
-  }, [id])
+  }, [id]);
 
   const handleChange = (e) => {
     setform((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -57,7 +56,7 @@ export default function ProblemEdit() {
     <div>
       <h2> Edit Problem</h2>
       <form onSubmit={handleSubmit}>
-            {[
+        {[
           ["Title", "title"],
           ["Description", "description"],
           ["Input Format", "inputFormat"],
@@ -67,7 +66,8 @@ export default function ProblemEdit() {
           ["Constraints", "constraints"],
         ].map(([label, name]) => (
           <div key={name}>
-            <label>{label}:</label><br />
+            <label>{label}:</label>
+            <br />
             <textarea
               name={name}
               value={form[name] || ""}
@@ -78,17 +78,66 @@ export default function ProblemEdit() {
           </div>
         ))}
         <div>
-            <label>Diffculty:</label> <br />
-            <select
-                name="difficulty"
-                value={form.difficulty}
-                onChange={handleChange}
-            >
-                <option>Easy</option>
-                <option>Medium</option>
-                <option>Hard</option>
-            </select>
+          <label>Diffculty:</label> <br />
+          <select
+            name="difficulty"
+            value={form.difficulty}
+            onChange={handleChange}
+          >
+            <option>Easy</option>
+            <option>Medium</option>
+            <option>Hard</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Test Cases:</label>
+          {form.testCases.map((tc, idx) => (
+            <div key={idx} style={{ marginBottom: "10px" }}>
+              <textarea
+                placeholder="Input"
+                rows={2}
+                value={tc.input}
+                onChange={(e) => {
+                  const newTC = [...form.testCases];
+                  newTC[idx].input = e.target.value;
+                  setform({ ...form, testCases: newTC });
+                }}
+              />
+              <textarea
+                placeholder="Expected Output"
+                rows={2}
+                value={tc.output}
+                onChange={(e) => {
+                  const newTC = [...form.testCases];
+                  newTC[idx].output = e.target.value;
+                  setform({ ...form, testCases: newTC });
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const newTC = form.testCases.filter((_, i) => i !== idx);
+                  setform({ ...form, testCases: newTC });
+                }}
+              >
+                Remove
+              </button>
             </div>
+          ))}
+          <button
+            type="button"
+            onClick={() =>
+              setform({
+                ...form,
+                testCases: [...form.testCases, { input: "", output: "" }],
+              })
+            }
+          >
+            Add Test Case
+          </button>
+        </div>
+
         <button type="submit">Update </button>
       </form>
     </div>

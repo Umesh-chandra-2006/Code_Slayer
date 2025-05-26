@@ -12,6 +12,7 @@ export default function NewProblem() {
     sampleOutput: "",
     constraints: "",
     difficulty: "Easy",
+    testCases: [{ input: "", output: "" }],
   });
 
   const handleChange = (e) => {
@@ -119,6 +120,55 @@ export default function NewProblem() {
             rows={4}
           />
         </div>
+        <div>
+          <label>Test Cases:</label>
+          <br />
+          {form.testCases.map((tc, idx) => (
+            <div key={idx} style={{ marginBottom: "10px" }}>
+              <textarea
+                placeholder="Input"
+                rows={2}
+                value={tc.input}
+                onChange={(e) => {
+                  const newTC = [...form.testCases];
+                  newTC[idx].input = e.target.value;
+                  setform({ ...form, testCases: newTC });
+                }}
+              />
+              <textarea
+                placeholder="Expected Output"
+                rows={2}
+                value={tc.output}
+                onChange={(e) => {
+                  const newTC = [...form.testCases];
+                  newTC[idx].output = e.target.value;
+                  setform({ ...form, testCases: newTC });
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const newTC = form.testCases.filter((_, i) => i !== idx);
+                  setform({ ...form, testCases: newTC });
+                }}
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() =>
+              setform({
+                ...form,
+                testCases: [...form.testCases, { input: "", output: "" }],
+              })
+            }
+          >
+            Add Test Case
+          </button>
+        </div>
+
         <button type="submit">Create </button>
       </form>
     </div>

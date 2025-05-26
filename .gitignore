@@ -1,1 +1,3 @@
 .vscode/
+backend/controllers/codes/
+backend/controllers/inputs/

@@ -7,13 +7,13 @@ import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
 import ProblemList from "./pages/ProblemList";
 import ViewProblem from "./pages/ViewProblem";
-import SubmissionList from "./pages/SubmissionList";
 import NewProblem from "./pages/NewProblem";
 import ProblemEdit from "./pages/ProblemEdit";
 import ProfilePage from "./pages/ProfilePage";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import CodeEditor from "./pages/CodeEditor";
+import SubmissionHistory from "./pages/SubmissionList";
 
 function App() {
   return (
@@ -48,14 +48,6 @@ function App() {
         }
       />
       <Route
-        path="/submissions"
-        element={
-          <PrivateRoute>
-            <SubmissionList />
-          </PrivateRoute>
-        }
-      />
-      <Route
         path="/problems/new"
         element={
           <PrivateRoute>
@@ -84,6 +76,14 @@ function App() {
         element={
           <PrivateRoute>
             <CodeEditor />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/submissions"
+        element={
+          <PrivateRoute>
+            <SubmissionHistory />
           </PrivateRoute>
         }
       />

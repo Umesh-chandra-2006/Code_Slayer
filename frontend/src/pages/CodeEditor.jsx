@@ -7,18 +7,19 @@ export default function CodeEditor({
   hideInputBox = false,
   userId = "",
   problemId = "",
-  testInput="",
 }) {
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(initialCode);
   const [input, setInput] = useState(initialInput);
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [language, setLanguage] = useState("cpp");
+  const [language, setLanguage] = useState(initialLanguage || "cpp");
 
   useEffect(() => {
+    setCode(initialCode);
     setInput(initialInput);
-  }, [initialInput]);
+    setLanguage(initialLanguage || "cpp");
+  }, [initialCode, initialInput, initialLanguage]);
 
   const handleCode = async (e) => {
     e.preventDefault();
@@ -30,7 +31,7 @@ export default function CodeEditor({
       const res = await fetch("http://localhost:5000/api/compiler/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ language: language, code: code, input: testInput || ""}),
+        body: JSON.stringify({ language, code, input }),
       });
 
       const data = await res.json();
@@ -39,6 +40,41 @@ export default function CodeEditor({
     } catch (err) {
       setError("Server error");
     }
+    setLoading(false);
+  };
+
+  const handleTestAllCases = async () => {
+    setLoading(true);
+    setOutput("");
+    setError("");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/compiler/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, language, problemId }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        const report = data.results
+          .map(
+            (r, i) =>
+              `Test #${i + 1}: ${
+                r.passed ? "✅ Passed" : "❌ Failed"
+              }\nInput:\n${r.input}\nExpected:\n${r.expected}\nGot:\n${
+                r.actual
+              }`
+          )
+          .join("\n\n");
+        setOutput(report);
+      } else {
+        setError(data.error || "Test failed");
+      }
+    } catch (err) {
+      setError("Server error");
+    }
+
     setLoading(false);
   };
 
@@ -58,14 +94,14 @@ export default function CodeEditor({
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/submission", {
+      const res = await fetch("http://localhost:5000/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, problemId, code, language }),
       });
 
       const data = await res.json();
-      
+
       if (res.ok) {
         setOutput(
           `✅ ${data.status.toUpperCase()}\n\nExpected Output:\n${
@@ -138,6 +174,12 @@ export default function CodeEditor({
         </button>
 
         <br />
+
+        <button type="button" disabled={loading} onClick={handleTestAllCases}>
+          {loading ? "Testing..." : "Test All Cases"}
+        </button>
+        <br />
+
         <button type="button" disabled={loading} onClick={handleSubmit}>
           {loading ? "Submitting..." : "Submit Solution"}
         </button>

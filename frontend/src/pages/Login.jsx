@@ -16,6 +16,7 @@ export default function Login() {
     e.preventDefault();
     setMessage("");
     setError("");
+    console.log("Login request body:", JSON.stringify(formData));
 
     try {
       const res = await fetch("http://localhost:5000/api/auth/login", {
@@ -32,6 +33,8 @@ export default function Login() {
         console.log("User Info:", data.user);
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("userId", data.user.id); 
+        console.log("Saved userId:", localStorage.getItem("userId"));
         navigate("/dashboard");
         setFormData({ email: "", password: "" });
       } else {

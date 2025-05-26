@@ -25,6 +25,7 @@ export default function ViewProblem() {
 
   if (!problem) return  <p>Loading problem or problem not found.</p>;
 
+
   return (
     <div>
       <h2>{problem.title}</h2>

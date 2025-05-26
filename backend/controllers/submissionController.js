@@ -84,4 +84,17 @@ const getAllSubmissions = async (req, res) => {
   }
 };
 
-module.exports = {handleSubmission, getAllSubmissions};
+const getUserSubmissions = async(req,res) => {
+  try {
+    const userId = req.params.userId;
+    const submissions = await Submission.find({user : userId})
+      .populate("problem","title")
+      .sort({createdAt: -1});
+
+      res.json(submissions);
+  } catch(err) {
+    res.status(500).json({error: "Error fetching submissions"});
+  }
+};
+
+module.exports = {handleSubmission, getAllSubmissions, getUserSubmissions};
