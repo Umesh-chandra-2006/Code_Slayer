@@ -8,6 +8,13 @@ export default function Dashboard() {
   useEffect(() => {
     const storeduser = localStorage.getItem("user");
     if (storeduser) setuser(JSON.parse(storeduser));
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found in localStorage!");
+      return;
+    }
+
   }, []);
 
   const handleLogout = () => {
@@ -32,13 +39,6 @@ export default function Dashboard() {
         <button onClick={handleLogout} style={{ marginLeft: "10px" }}>
           Logout
         </button>
-      </div>
-      <div style={{ marginTop: "30px" }}>
-        <h4> Stats</h4>
-        <ul>
-          <li>Problems solved:</li>
-          <li> Total Submissions:</li>
-        </ul>
       </div>
     </div>
   );

@@ -17,6 +17,7 @@ import SubmissionHistory from "./pages/SubmissionList";
 
 function App() {
   return (
+    <div className="min-h-screen">
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/register" element={<Register />} />
@@ -88,6 +89,7 @@ function App() {
         }
       />
     </Routes>
+    </div>
   );
 }
 export default App;

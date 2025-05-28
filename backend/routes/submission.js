@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const {
-    handleSubmission,
-    getAllSubmissions,
-    getUserSubmissions,
+  handleSubmission,
+  getAllSubmissions,
+  getUserSubmissions,
 } = require("../controllers/submissionController");
 
 router.post("/", handleSubmission);
