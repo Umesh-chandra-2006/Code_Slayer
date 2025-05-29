@@ -17,7 +17,7 @@ const runCppCode = async (req, res) => {
   } catch (err) {
     return res.status(500).json({
       success: false,
-      error: err.stderr || err.error || "Unknown execution error",
+      compilationError: err.details || err.error || "Unknown execution error",
     });
   }
 };
@@ -49,7 +49,7 @@ const testAgainstAllCases = async (req, res) => {
 
     return res.status(200).json({ success: true, results });
   } catch (err) {
-    return res.status(500).json({ error: err.message || err.stderr });
+    return res.status(500).json({ compilationError: err.details || err.error || "Unknown error during testing" });
   }
 };
 

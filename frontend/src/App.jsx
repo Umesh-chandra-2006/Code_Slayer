@@ -4,7 +4,7 @@ import Landing from "./pages/LandingPage";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import PrivateRoute from "./components/PrivateRoute";
+import PrivateRoute from "./components/PrivateRoute"; // Assuming this handles authentication logic
 import ProblemList from "./pages/ProblemList";
 import ViewProblem from "./pages/ViewProblem";
 import NewProblem from "./pages/NewProblem";
@@ -15,81 +15,45 @@ import ResetPassword from "./pages/ResetPassword";
 import CodeEditor from "./pages/CodeEditor";
 import SubmissionHistory from "./pages/SubmissionList";
 
+
+// Import the new layout component
+import DashboardLayout from "./components/DashboardLayout"; // This will be your main application layout
+
 function App() {
   return (
-    <div className="min-h-screen">
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password/:token" element={<ResetPassword />} />
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/problems"
-        element={
-          <PrivateRoute>
-            <ProblemList />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/problems/:id"
-        element={
-          <PrivateRoute>
-            <ViewProblem />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/problems/new"
-        element={
-          <PrivateRoute>
-            <NewProblem />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/problems/:id/edit"
-        element={
-          <PrivateRoute>
-            <ProblemEdit />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <PrivateRoute>
-            <ProfilePage />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/editor"
-        element={
-          <PrivateRoute>
-            <CodeEditor />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/submissions"
-        element={
-          <PrivateRoute>
-            <SubmissionHistory />
-          </PrivateRoute>
-        }
-      />
-    </Routes>
+    // The outermost div no longer needs the min-h-screen class, as the layout will handle it.
+    <div>
+      <Routes>
+        {/* Public Routes - These do NOT use the DashboardLayout */}
+        <Route path="/" element={<Landing />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        {/* The token route might need special handling or be considered public for the reset form itself */}
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+        {/* Private Routes - These routes will render within the DashboardLayout.
+          The <Outlet /> in DashboardLayout.jsx will render the specific page component.
+        */}
+        <Route
+          element={
+            <PrivateRoute>
+              <DashboardLayout />
+            </PrivateRoute>
+          }
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/problems" element={<ProblemList />} />
+          <Route path="/problems/:id" element={<ViewProblem />} />
+          <Route path="/problems/new" element={<NewProblem />} />
+          <Route path="/problems/:id/edit" element={<ProblemEdit />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/editor" element={<CodeEditor />} />
+          <Route path="/submissions" element={<SubmissionHistory />} />
+        </Route>
+      </Routes>
     </div>
   );
 }
+
 export default App;
