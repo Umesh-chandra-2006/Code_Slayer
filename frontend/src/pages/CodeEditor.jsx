@@ -15,12 +15,13 @@ export default function CodeEditor({
   const [output, setOutput] = useState("");
   const [compilationError, setCompilationError] = useState("");
   const [runtimeError, setRuntimeError] = useState("");
-  const [testResults, setTestResults] = useState([]);
+  const [testResults, setTestResults] = useState([]); // Array for detailed test results
   const [loadingRun, setLoadingRun] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [language, setLanguage] = useState(initialLanguage);
   const [submissionMessage, setSubmissionMessage] = useState("");
   const [currentTab, setCurrentTab] = useState("output"); // 'output', 'test_results'
+  const [submissionVerdict, setSubmissionVerdict] = useState(""); // New state for overall submission verdict
 
   useEffect(() => {
     setCode(initialCode);
@@ -34,68 +35,67 @@ export default function CodeEditor({
     setRuntimeError("");
     setTestResults([]);
     setSubmissionMessage("");
+    setSubmissionVerdict(""); // Clear verdict
   };
+        const token = localStorage.getItem("token");
+
 
   // New combined function for "Run Code"
   const handleRunOrTestCode = async (e) => {
     e.preventDefault();
     clearResults();
     setLoadingRun(true);
-    setCurrentTab("output"); // Default to output tab
-
     // Determine if we should run against test cases or custom input
     const shouldRunAgainstTestCases = problemId && !input.trim(); // Run against test cases if problemId exists and no custom input
+    setCurrentTab(shouldRunAgainstTestCases ? "test_results" : "output"); // Set tab based on action
 
     try {
       let res;
       let data;
 
       if (shouldRunAgainstTestCases) {
-        if (!problemId) { // Should not happen if problemId is checked above, but as a safeguard
+        if (!problemId) {
           setCompilationError("Error: Problem ID is missing for testing.");
           setLoadingRun(false);
           return;
         }
-        setCurrentTab("test_results"); // Switch to test results if running against test cases
         res = await fetch("http://localhost:5000/api/compiler/test", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
           body: JSON.stringify({ language, code, problemId }),
         });
         data = await res.json();
         if (res.ok) {
-          setTestResults(data.testResults || []);
-          if (data.compilationError) {
-            setCompilationError(data.compilationError);
-            setTestResults([]); // Clear test results if there's a compilation error
-          }
+          setTestResults(data.testResults || []); // backend sends 'testResults'
+          setCompilationError(data.compilationError || "");
+          setSubmissionVerdict(data.overallVerdict || ""); // Store overall verdict from test endpoint
         } else {
-          setCompilationError(data.error || "Failed to test all cases.");
+          setCompilationError(data.compilationError || data.error || "Failed to test all cases.");
+          setSubmissionVerdict("Error");
+          setTestResults([]); // Clear results on error
         }
       } else {
         // Run with custom input or no input
         res = await fetch("http://localhost:5000/api/compiler/run", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json","Authorization": `Bearer ${token}` },
           body: JSON.stringify({ language, code, input }),
         });
         data = await res.json();
         if (res.ok) {
-          if (data.output) {
-            setOutput(data.output);
-          } else if (data.compilationError) {
-            setCompilationError(data.compilationError);
-          } else if (data.runtimeError) {
-            setRuntimeError(data.runtimeError);
-          } else {
-            setOutput("No output, compilation, or runtime error.");
-          }
+          setOutput(data.output || "");
+          setCompilationError(data.compilationError || "");
+          setRuntimeError(data.runtimeError || "");
+          // Simple status for run for now, based on presence of errors
+          setSubmissionVerdict(data.compilationError || data.runtimeError ? "Error" : "Completed");
         } else {
-          setCompilationError(data.error || "Execution failed.");
+          setCompilationError(data.compilationError || data.error || "Execution failed.");
+          setSubmissionVerdict("Error");
         }
       }
     } catch (err) {
       setRuntimeError("Server error during code execution or testing.");
+      setSubmissionVerdict("Error");
       console.error("Error running/testing code:", err);
     } finally {
       setLoadingRun(false);
@@ -106,46 +106,61 @@ export default function CodeEditor({
     clearResults();
     setLoadingSubmit(true);
     setSubmissionMessage("");
+    setSubmissionVerdict("Pending"); // Set to pending immediately on submit
 
     if (!problemId || !userId) {
       setSubmissionMessage("Error: Problem ID or User ID is missing for submission.");
       setLoadingSubmit(false);
+      setSubmissionVerdict("Error");
       return;
     }
 
     try {
       const res = await fetch("http://localhost:5000/api/submissions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({ userId, problemId, code, language }),
       });
 
       const data = await res.json();
       if (res.ok) {
         setSubmissionMessage(data.message || "Solution submitted successfully!");
+        setSubmissionVerdict(data.verdict || "Error"); // Use the verdict from backend
+        setTestResults(data.testResults || []); // Display test results from submission
+        setCompilationError(data.compilationError || "");
+        setCurrentTab(data.testResults && data.testResults.length > 0 ? "test_results" : "output");
       } else {
         setSubmissionMessage(data.error || "Submission failed.");
+        setSubmissionVerdict(data.verdict || "Error"); // Use the verdict from backend
+        setCompilationError(data.compilationError || "");
+        setTestResults([]);
       }
     } catch (err) {
       setSubmissionMessage("Server error during submission.");
+      setSubmissionVerdict("Error");
       console.error("Error submitting solution:", err);
     } finally {
       setLoadingSubmit(false);
     }
   };
 
+  // Maps backend verdict strings to Tailwind CSS classes
   const statusVariant = (status) => {
     switch (status) {
-      case "accepted":
+      case "Accepted":
         return "bg-green-500/20 text-green-400 border-green-600";
-      case "wrong answer":
+      case "Wrong Answer":
         return "bg-red-500/20 text-red-400 border-red-600";
-      case "time limit exceeded":
+      case "Time Limit Exceeded":
         return "bg-yellow-500/20 text-yellow-400 border-yellow-600";
-      case "runtime error":
+      case "Runtime Error":
         return "bg-purple-500/20 text-purple-400 border-purple-600";
-      case "compilation error": // Added for consistency, though handled separately
+      case "Compilation Error":
         return "bg-red-500/20 text-red-400 border-red-600";
+      case "Error":
+        return "bg-gray-500/20 text-gray-400 border-gray-600"; // General error
+      case "Pending":
+        return "bg-blue-500/20 text-blue-400 border-blue-600";
       default:
         return "bg-gray-500/20 text-gray-400 border-gray-600";
     }
@@ -230,7 +245,6 @@ export default function CodeEditor({
             "Run Code"
           )}
         </Button>
-        {/* "Test All Cases" button is removed */}
         <Button
           onClick={handleSubmitSolution}
           disabled={loadingRun || loadingSubmit || !problemId || !userId}
@@ -293,6 +307,12 @@ export default function CodeEditor({
                   {submissionMessage}
                 </p>
               )}
+              {/* Display overall verdict for submission here */}
+              {submissionVerdict && submissionVerdict !== "Pending" && (
+                <p className={`p-3 rounded-lg mb-4 text-sm font-bold ${statusVariant(submissionVerdict)}`}>
+                  Overall Verdict: {submissionVerdict}
+                </p>
+              )}
               {(output || compilationError || runtimeError) ? (
                 <div className="bg-gray-900 p-4 rounded-lg border border-gray-700 min-h-[100px] overflow-auto">
                   {output && (
@@ -329,6 +349,11 @@ export default function CodeEditor({
               exit="exit"
               className="mt-4"
             >
+              {submissionVerdict && submissionVerdict !== "Pending" && (
+                <p className={`p-3 rounded-lg mb-4 text-sm font-bold ${statusVariant(submissionVerdict)}`}>
+                  Overall Verdict: {submissionVerdict}
+                </p>
+              )}
               {testResults.length > 0 ? (
                 <div className="space-y-4">
                   {testResults.map((result, index) => (
@@ -343,7 +368,7 @@ export default function CodeEditor({
                             <strong className="text-gray-200">Status:</strong>{" "}
                             <span className="capitalize">{result.status}</span>
                           </p>
-                          {result.time && <p className="text-gray-300"><strong className="text-gray-200">Time:</strong> {result.time} ms</p>}
+                          {result.time && <p className="text-gray-300"><strong className="text-gray-200">Time:</strong> {result.time.toFixed(2)} ms</p>} {/* Display time with 2 decimal places */}
                           {result.memory && <p className="text-gray-300"><strong className="text-gray-200">Memory:</strong> {result.memory} KB</p>}
                         </div>
                         <div>
@@ -352,9 +377,9 @@ export default function CodeEditor({
                           <p className="text-gray-300"><strong className="text-gray-200">Your Output:</strong> <pre className="inline-block bg-gray-700/50 p-1 rounded whitespace-pre-wrap">{result.actualOutput}</pre></p>
                         </div>
                       </div>
-                      {result.errorMessage && (
+                      {result.details && ( // Use 'details' from backend
                         <p className="text-red-300 mt-2">
-                          <strong className="text-red-200">Error:</strong> {result.errorMessage}
+                          <strong className="text-red-200">Details:</strong> {result.details}
                         </p>
                       )}
                     </div>

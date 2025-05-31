@@ -11,6 +11,8 @@ export default function Register() {
     confirm_password: "",
   });
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const [verificationCode, setVerificationCode] = useState("");
   const [step, setStep] = useState(1);
   const [message, setMessage] = useState("");
@@ -65,7 +67,7 @@ export default function Register() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -102,7 +104,7 @@ export default function Register() {
     setIsLoading(true); // Start loading
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/verification", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/verification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email, code: verificationCode }),
@@ -138,7 +140,7 @@ export default function Register() {
     setIsLoading(true); // Start loading
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/resend-code", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/resend-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email }),

@@ -7,6 +7,7 @@ const userRoutes = require("./routes/user");
 const problemRoutes = require("./routes/problem");
 const submissionRoutes = require("./routes/submission");
 const compiler = require("./routes/compiler");
+const dashboard = require("./routes/dashboard");
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/problems", problemRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/compiler", compiler);
+app.use("/api/dashboard", dashboard);
 
 app.get("/api/problems/test", (req, res) => {
   res.send("Problem route is working!");

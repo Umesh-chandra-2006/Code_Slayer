@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute"; // Assuming this handles authentication logic
+import AdminRoute from "./components/AdminRoute";
 import ProblemList from "./pages/ProblemList";
 import ViewProblem from "./pages/ViewProblem";
 import NewProblem from "./pages/NewProblem";
@@ -14,7 +15,6 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import CodeEditor from "./pages/CodeEditor";
 import SubmissionHistory from "./pages/SubmissionList";
-
 
 // Import the new layout component
 import DashboardLayout from "./components/DashboardLayout"; // This will be your main application layout
@@ -45,12 +45,26 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/problems" element={<ProblemList />} />
           <Route path="/problems/:id" element={<ViewProblem />} />
-          <Route path="/problems/new" element={<NewProblem />} />
-          <Route path="/problems/:id/edit" element={<ProblemEdit />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/editor" element={<CodeEditor />} />
           <Route path="/submissions" element={<SubmissionHistory />} />
         </Route>
+        <Route
+          path="/problems/new"
+          element={
+            <AdminRoute>
+              <NewProblem />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/problems/:id/edit"
+          element={
+            <AdminRoute>
+              <ProblemEdit />
+            </AdminRoute>
+          }
+        />
       </Routes>
     </div>
   );

@@ -19,13 +19,18 @@ const SubmissionHistory = () => {
           setLoading(false);
           return;
         }
-
-        const response = await fetch(`http://localhost:5000/api/submissions/user/${userId}`);
+        const token = localStorage.getItem("token");
+        const response = await fetch(`http://localhost:5000/api/submissions/user/${userId}`, {
+          headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+        });
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
         }
+        // Assuming data is an object with a 'submissions' array
         const data = await response.json();
-        setSubmissions(data);
+        setSubmissions(data.submissions || []); // Access data.submissions
       } catch (err) {
         console.error("Error fetching submissions:", err);
         setError("Failed to load submissions. Please try again later.");
@@ -52,16 +57,23 @@ const SubmissionHistory = () => {
     visible: { opacity: 1, y: 0 },
   };
 
-  const getStatusBadgeVariant = (status) => {
-    switch (status) {
-      case "accepted":
+  // Updated to match new backend verdict enum values
+  const getStatusBadgeVariant = (verdict) => {
+    switch (verdict) {
+      case "Accepted":
         return "success";
-      case "rejected":
+      case "Wrong Answer":
         return "danger";
-      case "pending":
-        return "warning";
-      case "error":
-        return "info"; // Or another appropriate color for error
+      case "Time Limit Exceeded":
+        return "warning"; // Consider a different color if you have more
+      case "Runtime Error":
+        return "info"; // Or a specific error color
+      case "Compilation Error":
+        return "danger";
+      case "Pending":
+        return "default"; // Or a 'pending' specific color like blue
+      case "Error":
+        return "dark"; // For general backend errors
       default:
         return "default";
     }
@@ -136,8 +148,8 @@ const SubmissionHistory = () => {
                       Language
                     </th>
                     <th className="py-3 px-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
-                      Status
-                    </th>
+                      Verdict
+                    </th> {/* Changed from Status to Verdict */}
                     <th className="py-3 px-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
                       Submitted On
                     </th>
@@ -164,8 +176,8 @@ const SubmissionHistory = () => {
                         {sub.language}
                       </td>
                       <td className="py-3 px-4 text-sm">
-                        <Badge variant={getStatusBadgeVariant(sub.status)}>
-                          {sub.status}
+                        <Badge variant={getStatusBadgeVariant(sub.verdict)}> {/* Use sub.verdict */}
+                          {sub.verdict}
                         </Badge>
                       </td>
                       <td className="py-3 px-4 text-sm text-gray-400">

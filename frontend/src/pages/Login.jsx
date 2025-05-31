@@ -10,6 +10,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false); // New loading state
    const [showPassword, setShowPassword] = useState(false); 
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
 
   const handleChanges = (e) => {
@@ -28,7 +29,7 @@ export default function Login() {
     setIsLoading(true); // Start loading
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -41,6 +42,7 @@ export default function Login() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("userId", data.user.id);
+        const isAdmin = data.user?.role === "admin";
         
         setTimeout(() => {
           navigate("/dashboard"); // Redirect to dashboard
@@ -117,7 +119,7 @@ export default function Login() {
               className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="your@example.com"
               required
-              autoComplete="email" // For better browser autofill
+              autoComplete="email"
             />
           </div>
 
@@ -135,7 +137,7 @@ export default function Login() {
               placeholder="Enter your password"
               required
               minLength={8}
-              autoComplete="current-password" // For better browser autofill
+              autoComplete="current-password"
             />
             <button
               type="button" // Important: type="button" to prevent form submission

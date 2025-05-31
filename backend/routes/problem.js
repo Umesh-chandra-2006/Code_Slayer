@@ -8,10 +8,12 @@ const {
   deleteproblem,
 } = require("../controllers/problemController");
 
+const { isAuthenticated, isAdmin } = require("../middleware/authmiddleware");
+
 router.get("/", getallproblems);
 router.get("/:id", getproblembyId);
-router.post("/", createproblem);
-router.put("/:id", updateproblem);
-router.delete("/:id", deleteproblem);
+router.post("/", isAuthenticated, isAdmin, createproblem);
+router.put("/:id", isAuthenticated, isAdmin, updateproblem);
+router.delete("/:id", isAuthenticated, isAdmin, deleteproblem);
 
 module.exports = router;

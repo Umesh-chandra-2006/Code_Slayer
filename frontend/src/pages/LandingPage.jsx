@@ -314,6 +314,7 @@ export default function LandingPage() {
               mastery today.
             </p>
             <motion.button
+              variants={itemVariants}
               whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(0,0,0,0.4)" }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate("/register")}

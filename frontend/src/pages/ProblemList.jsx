@@ -11,6 +11,9 @@ export default function ProblemList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isAdmin = user?.role === "admin";
+
   useEffect(() => {
     const fetchProblems = async () => {
       try {
@@ -64,9 +67,23 @@ export default function ProblemList() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-gray-300">
-        <svg className="animate-spin h-8 w-8 mr-3 text-blue-500" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <svg
+          className="animate-spin h-8 w-8 mr-3 text-blue-500"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
         </svg>
         Loading problems...
       </div>
@@ -85,7 +102,7 @@ export default function ProblemList() {
     <div className="min-h-screen bg-gray-900 p-8 text-gray-100">
       <div className="max-w-4xl mx-auto">
         <h2 className="text-4xl font-extrabold text-white mb-8 text-center">
-          Available Problems
+          Problems List
         </h2>
 
         {problems.length === 0 ? (
@@ -100,57 +117,48 @@ export default function ProblemList() {
             transition={{ staggerChildren: 0.1 }}
           >
             {problems.map((problem) => (
-              <motion.div
-                key={problem._id}
-                variants={itemVariants}
-              >
+              <motion.div key={problem._id} variants={itemVariants}>
                 <Card className="bg-gray-800 border border-gray-700 shadow-xl hover:shadow-2xl transition-all duration-300">
                   <div className="flex justify-between items-start mb-3">
-                    <Link to={`/problems/${problem._id}`} className="hover:text-blue-400 transition-colors">
+                    <Link
+                      to={`/problems/${problem._id}`}
+                      className="hover:text-blue-400 transition-colors"
+                    >
                       <h3 className="text-2xl font-bold text-white leading-tight">
                         {problem.title}
                       </h3>
                     </Link>
                     <Badge
-                      variant={
-                        problem.difficulty === "Hard"
-                          ? "danger"
-                          : problem.difficulty === "Medium"
-                          ? "warning"
-                          : "success"
-                      }
+                      variant={problem.difficulty.toLowerCase()}
                       className="ml-4 py-1 px-3 text-sm rounded-full"
                     >
-                      {problem.difficulty}
+                      {problem.difficulty.charAt(0).toUpperCase() +
+                        problem.difficulty.slice(1)}
                     </Badge>
                   </div>
                   <p className="text-gray-400 mb-4 line-clamp-2">
                     {problem.description}
                   </p>
                   <div className="flex justify-end space-x-3">
-                    <Button
-                      variant="secondary"
-                      onClick={() => handleDelete(problem._id)}
-                      className="bg-red-600 hover:bg-red-700 text-white"
-                    >
-                      Delete
-                    </Button>
-                    <Link to={`/problems/${problem._id}/edit`}>
-                      <Button
-                        variant="primary"
-                        className="bg-orange-500 hover:bg-orange-600 text-white"
-                      >
-                        Edit
-                      </Button>
-                    </Link>
-                    <Link to={`/problems/${problem._id}`}>
-                      <Button
-                        variant="primary"
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        View Problem
-                      </Button>
-                    </Link>
+                    {isAdmin && (
+                      <>
+                        <Button
+                          variant="secondary"
+                          onClick={() => handleDelete(problem._id)}
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                          Delete
+                        </Button>
+                        <Link to={`/problems/${problem._id}/edit`}>
+                          <Button
+                            variant="primary"
+                            className="bg-orange-500 hover:bg-orange-600 text-white"
+                          >
+                            Edit
+                          </Button>
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </Card>
               </motion.div>

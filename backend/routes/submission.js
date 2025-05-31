@@ -5,9 +5,11 @@ const {
   getAllSubmissions,
   getUserSubmissions,
 } = require("../controllers/submissionController");
+const { isAuthenticated, isAdmin } = require("../middleware/authmiddleware");
 
-router.post("/", handleSubmission);
-router.get("/", getAllSubmissions);
-router.get("/user/:userId", getUserSubmissions);
+
+router.post("/",isAuthenticated, handleSubmission);
+router.get("/",isAuthenticated, isAdmin, getAllSubmissions);
+router.get("/user/:userId", isAuthenticated, getUserSubmissions);
 
 module.exports = router;
