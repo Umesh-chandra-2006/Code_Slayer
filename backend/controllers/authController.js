@@ -11,6 +11,7 @@ const pendinguser = {};
 const code_expiry = 2.5 * 60 * 1000;
 const code_cooldown = 60 * 1000;
 
+//For verification email
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
@@ -21,6 +22,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+//Registration Process
 exports.register = async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -65,6 +67,7 @@ exports.register = async (req, res) => {
   }
 };
 
+//Email verification Process
 exports.verification = async (req, res) => {
   const { email, code } = req.body;
 
@@ -98,6 +101,8 @@ exports.verification = async (req, res) => {
       .json({ message: "Verification failed", error: err.message });
   }
 };
+
+//Login Process
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -107,19 +112,29 @@ exports.login = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
 
     if (!match) return res.status(400).json({ message: "Invalid Credentials" });
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
 
     res.status(200).json({
       token,
-      user: { id: user._id, username: user.username, email: user.email,role:user.role },
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (err) {
     res.status(500).json({ message: "Login failed:", error: err.message });
   }
 };
 
+//Resend Verification Code Process
 exports.resendCode = async (req, res) => {
   const { email } = req.body;
 
@@ -158,11 +173,12 @@ exports.resendCode = async (req, res) => {
   }
 };
 
+//Forgot Password Process
 exports.forgotpassword = async (req, res) => {
   const { email } = req.body;
 
   try {
-    const user = await User.findOne({email});
+    const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const resetToken = crypto.randomBytes(20).toString("hex");
@@ -176,7 +192,7 @@ exports.forgotpassword = async (req, res) => {
     user.resetPasswordExpire = expiry;
     await user.save();
 
-    const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
+    const resetURL = `${process.env.API_BASE_URL}/reset-password/${resetToken}`;
 
     const message = `
       <h3> Password Reset Link <h3>
@@ -202,9 +218,9 @@ exports.forgotpassword = async (req, res) => {
   }
 };
 
+//Reset Password Process
 exports.resetpassword = async (req, res) => {
-const { token,  password } = req.body;
-
+  const { token, password } = req.body;
 
   const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 

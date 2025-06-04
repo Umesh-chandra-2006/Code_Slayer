@@ -1,4 +1,3 @@
-// src/components/UI/Card.jsx
 import React from 'react';
 
 const Card = ({ children, className = '' }) => {

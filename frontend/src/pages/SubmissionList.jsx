@@ -1,46 +1,156 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Card from "../components/UI/Card"; // Assuming you have a Card component
-import Badge from "../components/UI/Badge"; // Assuming you have a Badge component
+import Card from "../components/UI/Card";
+import Badge from "../components/UI/Badge";
+import Button from "../components/UI/Button"; // Assuming Button component is used for dropdowns
+import { useNavigate, Link } from "react-router-dom"; // For clickable rows and problem links
+
+// Lucide React Icons (assuming you have these installed)
+import { Search, SlidersHorizontal, Languages, History, SortAsc, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+
+// Custom hook for debouncing values (from ProblemList.jsx)
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 const SubmissionHistory = () => {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const userId = localStorage.getItem("userId");
+  const navigate = useNavigate(); // Initialize navigate hook
+
+  // --- State for Filters and Sorting ---
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500); // Debounce search term
+  const [selectedLanguage, setSelectedLanguage] = useState("All");
+  const [selectedVerdict, setSelectedVerdict] = useState("All");
+  const [sortBy, setSortBy] = useState("submittedAt"); // Default sort by submittedAt
+  const [sortOrder, setSortOrder] = useState("desc"); // Default descending (newest first)
+  // ------------------------------------
+
+  // States for custom dropdown/popover visibility
+  const [showLanguageFilter, setShowLanguageFilter] = useState(false);
+  const [showVerdictFilter, setShowVerdictFilter] = useState(false);
+  const [showSortOptions, setShowSortOptions] = useState(false);
+
+  // Refs for dropdowns to handle clicks outside
+  const languageFilterRef = useRef(null);
+  const verdictFilterRef = useRef(null);
+  const sortOptionsRef = useRef(null);
+
+
+  const fetchSubmissions = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      if (!userId) {
+        setError("User not logged in.");
+        setLoading(false);
+        return;
+      }
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/api/submissions/user/${userId}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+      const data = await response.json();
+      setSubmissions(data.submissions || []);
+    } catch (err) {
+      console.error("Error fetching submissions:", err);
+      setError("Failed to load submissions. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
 
   useEffect(() => {
-    const fetchSubmissions = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        if (!userId) {
-          setError("User not logged in.");
-          setLoading(false);
-          return;
-        }
-        const token = localStorage.getItem("token");
-        const response = await fetch(`http://localhost:5000/api/submissions/user/${userId}`, {
-          headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-        });
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
-        // Assuming data is an object with a 'submissions' array
-        const data = await response.json();
-        setSubmissions(data.submissions || []); // Access data.submissions
-      } catch (err) {
-        console.error("Error fetching submissions:", err);
-        setError("Failed to load submissions. Please try again later.");
-      } finally {
-        setLoading(false);
+    fetchSubmissions();
+  }, [fetchSubmissions]);
+
+  // Effect for closing dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (languageFilterRef.current && !languageFilterRef.current.contains(event.target)) {
+        setShowLanguageFilter(false);
+      }
+      if (verdictFilterRef.current && !verdictFilterRef.current.contains(event.target)) {
+        setShowVerdictFilter(false);
+      }
+      if (sortOptionsRef.current && !sortOptionsRef.current.contains(event.target)) {
+        setShowSortOptions(false);
       }
     };
 
-    fetchSubmissions();
-  }, [userId]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // --- Filtering and Sorting Logic ---
+  const filteredAndSortedSubmissions = useMemo(() => {
+    let tempSubmissions = [...submissions];
+
+    // 1. Search Term Filter (using debounced value)
+    if (debouncedSearchTerm) {
+      tempSubmissions = tempSubmissions.filter(sub =>
+        sub.problem?.title?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        sub.language?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      );
+    }
+
+    // 2. Language Filter
+    if (selectedLanguage !== "All") {
+      tempSubmissions = tempSubmissions.filter(sub => sub.language === selectedLanguage);
+    }
+
+    // 3. Verdict Filter
+    if (selectedVerdict !== "All") {
+      tempSubmissions = tempSubmissions.filter(sub => sub.verdict === selectedVerdict);
+    }
+
+    // 4. Sorting
+    tempSubmissions.sort((a, b) => {
+      let compareValue = 0;
+      if (sortBy === "submittedAt") {
+        compareValue = new Date(a.submittedAt) - new Date(b.submittedAt);
+      } else if (sortBy === "problemTitle") {
+        compareValue = (a.problem?.title || "").localeCompare(b.problem?.title || "");
+      } else if (sortBy === "language") {
+        compareValue = (a.language || "").localeCompare(b.language || "");
+      } else if (sortBy === "verdict") {
+        compareValue = (a.verdict || "").localeCompare(b.verdict || "");
+      } else if (sortBy === "runtime") {
+        compareValue = (a.runtime || 0) - (b.runtime || 0); // Handle null/undefined runtime
+      } else if (sortBy === "memory") {
+        compareValue = (a.memory || 0) - (b.memory || 0); // Handle null/undefined memory
+      }
+
+      return sortOrder === "asc" ? compareValue : -compareValue;
+    });
+
+    return tempSubmissions;
+  }, [submissions, debouncedSearchTerm, selectedLanguage, selectedVerdict, sortBy, sortOrder]);
+  // ------------------------------------
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -57,140 +167,464 @@ const SubmissionHistory = () => {
     visible: { opacity: 1, y: 0 },
   };
 
-  // Updated to match new backend verdict enum values
   const getStatusBadgeVariant = (verdict) => {
     switch (verdict) {
       case "Accepted":
-        return "success";
+        return "success"; // Green
       case "Wrong Answer":
-        return "danger";
+        return "danger"; // Red
       case "Time Limit Exceeded":
-        return "warning"; // Consider a different color if you have more
+        return "warning"; // Yellow/Orange
       case "Runtime Error":
-        return "info"; // Or a specific error color
+        return "info"; // Blue/Cyan
       case "Compilation Error":
-        return "danger";
+        return "danger"; // Red
       case "Pending":
-        return "default"; // Or a 'pending' specific color like blue
+        return "default"; // Gray/Default
       case "Error":
-        return "dark"; // For general backend errors
+        return "dark"; // Darker gray/Black
       default:
         return "default";
     }
   };
 
+  const handleSortChange = (newSortBy) => {
+    // If clicking the same sort option, toggle order
+    if (sortBy === newSortBy) {
+      setSortOrder(prevOrder => (prevOrder === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortBy(newSortBy);
+      setSortOrder('asc'); // Default to ascending when changing sort field
+    }
+    setCurrentPage(1); // Reset to first page on sort change
+    setShowSortOptions(false); // Close dropdown
+  };
+
+
+  // Extract unique languages and verdicts for filter options
+  const uniqueLanguages = useMemo(() => {
+    const langs = new Set(submissions.map(sub => sub.language));
+    return ["All", ...Array.from(langs).sort()];
+  }, [submissions]);
+
+  const uniqueVerdicts = useMemo(() => {
+    const verdicts = new Set(submissions.map(sub => sub.verdict));
+    return ["All", ...Array.from(verdicts).sort()];
+  }, [submissions]);
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedLanguage("All");
+    setSelectedVerdict("All");
+    setSortBy("submittedAt");
+    setSortOrder("desc");
+  };
+
+
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 sm:p-6 lg:p-8">
-      <Card className="max-w-5xl mx-auto bg-gray-800 border border-gray-700 shadow-xl p-6 lg:p-8">
-        <motion.h2
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-3xl font-extrabold text-white mb-8 text-center"
-        >
-          Submission History
-        </motion.h2>
+    <div className="container mx-auto p-6 bg-gradient-to-br from-gray-900 to-black min-h-screen text-white font-sans">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-extrabold text-blue-400">Submission History</h1>
+        {/* No 'Add New Submission' button here, naturally */}
+      </div>
 
-        <AnimatePresence>
-          {loading && (
-            <motion.p
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-center text-lg text-blue-400 py-8"
+      {error && (
+        <div className="bg-red-500 text-white p-3 rounded-md mb-4 text-center">
+          {error}
+        </div>
+      )}
+
+      {/* Filter and Search Section - Mimicking ProblemList's layout */}
+      <div className="mb-6 bg-neutral-900 p-5 rounded-lg shadow-xl border border-neutral-700">
+        <div className="flex flex-wrap items-center gap-4 mb-4">
+          {/* Search Bar */}
+          <div className="relative flex-grow min-w-[200px] max-w-sm">
+            <input
+              type="text"
+              placeholder="Search problems or language..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-lg bg-neutral-800 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
+            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            {searchTerm && (
+              <XCircle
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-white"
+                size={20}
+                onClick={() => setSearchTerm("")}
+              />
+            )}
+          </div>
+
+          {/* Language Filter Dropdown */}
+          <div className="relative" ref={languageFilterRef}>
+            <Button
+              variant="secondary"
+              onClick={() => setShowLanguageFilter(!showLanguageFilter)}
+              className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 px-4 py-2 rounded-lg"
             >
-              Loading submissions...
-            </motion.p>
+              <Languages size={20} />
+              <span>Language: {selectedLanguage === "All" ? "All" : selectedLanguage}</span>
+            </Button>
+            {showLanguageFilter && (
+              <div className="absolute z-10 mt-2 w-48 bg-neutral-800 rounded-lg shadow-lg border border-neutral-700 p-2">
+                {uniqueLanguages.map(lang => (
+                  <label key={lang} className="flex items-center p-2 rounded-md hover:bg-neutral-700 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="language"
+                      value={lang}
+                      checked={selectedLanguage === lang}
+                      onChange={() => {
+                        setSelectedLanguage(lang);
+                        setShowLanguageFilter(false); // Close dropdown on selection
+                      }}
+                      className="form-radio h-4 w-4 text-blue-500 rounded border-gray-600 focus:ring-blue-500 bg-neutral-700"
+                    />
+                    <span className="ml-2 text-white">{lang}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Verdict Filter Dropdown */}
+          <div className="relative" ref={verdictFilterRef}>
+            <Button
+              variant="secondary"
+              onClick={() => setShowVerdictFilter(!showVerdictFilter)}
+              className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 px-4 py-2 rounded-lg"
+            >
+              <History size={20} />
+              <span>Verdict: {selectedVerdict === "All" ? "All" : selectedVerdict}</span>
+            </Button>
+            {showVerdictFilter && (
+              <div className="absolute z-10 mt-2 w-48 bg-neutral-800 rounded-lg shadow-lg border border-neutral-700 p-2 text-white">
+                {uniqueVerdicts.map(verdict => (
+                  <label key={verdict} className="flex items-center p-2 rounded-md hover:bg-neutral-700 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="verdict"
+                      value={verdict}
+                      checked={selectedVerdict === verdict}
+                      onChange={() => {
+                        setSelectedVerdict(verdict);
+                        setShowVerdictFilter(false); // Close dropdown on selection
+                      }}
+                      className="form-radio h-4 w-4 text-green-500" // Example color for radio
+                    />
+                    <span className="ml-2">{verdict}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Sort By Dropdown */}
+          <div className="relative" ref={sortOptionsRef}>
+            <Button
+              variant="secondary"
+              onClick={() => setShowSortOptions(!showSortOptions)}
+              className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 px-4 py-2 rounded-lg"
+            >
+              <SortAsc size={20} />
+              <span>
+                Sort By:{" "}
+                {sortBy === "submittedAt"
+                  ? "Submitted On"
+                  : sortBy === "problemTitle"
+                  ? "Problem Title"
+                  : sortBy === "language"
+                  ? "Language"
+                  : sortBy === "verdict"
+                  ? "Verdict"
+                  : sortBy === "runtime"
+                  ? "Runtime"
+                  : "Memory"}
+                ({sortOrder === "asc" ? "Asc" : "Desc"})
+              </span>
+            </Button>
+            {showSortOptions && (
+              <div className="absolute z-10 mt-2 w-48 bg-neutral-800 rounded-lg shadow-lg border border-neutral-700 p-2 text-white">
+                <p className="font-semibold text-gray-300 px-2 pt-1 pb-2 border-b border-neutral-700">Field</p>
+                {/* Sort by Field */}
+                <label className="flex items-center p-2 rounded-md hover:bg-neutral-700 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="sortBy"
+                    value="submittedAt"
+                    checked={sortBy === "submittedAt"}
+                    onChange={() => handleSortChange("submittedAt")}
+                    className="form-radio h-4 w-4 text-blue-500"
+                  />
+                  <span className="ml-2">Submitted On</span>
+                </label>
+                <label className="flex items-center p-2 rounded-md hover:bg-neutral-700 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="sortBy"
+                    value="problemTitle"
+                    checked={sortBy === "problemTitle"}
+                    onChange={() => handleSortChange("problemTitle")}
+                    className="form-radio h-4 w-4 text-blue-500"
+                  />
+                  <span className="ml-2">Problem Title</span>
+                </label>
+                <label className="flex items-center p-2 rounded-md hover:bg-neutral-700 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="sortBy"
+                    value="language"
+                    checked={sortBy === "language"}
+                    onChange={() => handleSortChange("language")}
+                    className="form-radio h-4 w-4 text-blue-500"
+                  />
+                  <span className="ml-2">Language</span>
+                </label>
+                <label className="flex items-center p-2 rounded-md hover:bg-neutral-700 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="sortBy"
+                    value="verdict"
+                    checked={sortBy === "verdict"}
+                    onChange={() => handleSortChange("verdict")}
+                    className="form-radio h-4 w-4 text-blue-500"
+                  />
+                  <span className="ml-2">Verdict</span>
+                </label>
+                <label className="flex items-center p-2 rounded-md hover:bg-neutral-700 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="sortBy"
+                    value="runtime"
+                    checked={sortBy === "runtime"}
+                    onChange={() => handleSortChange("runtime")}
+                    className="form-radio h-4 w-4 text-blue-500"
+                  />
+                  <span className="ml-2">Runtime</span>
+                </label>
+                <label className="flex items-center p-2 rounded-md hover:bg-neutral-700 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="sortBy"
+                    value="memory"
+                    checked={sortBy === "memory"}
+                    onChange={() => handleSortChange("memory")}
+                    className="form-radio h-4 w-4 text-blue-500"
+                  />
+                  <span className="ml-2">Memory</span>
+                </label>
+
+                <p className="font-semibold text-gray-300 px-2 pt-3 pb-2 border-t border-neutral-700 mt-2">Order</p>
+                {/* Sort by Order */}
+                <label className="flex items-center p-2 rounded-md hover:bg-neutral-700 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="sortOrder"
+                    value="asc"
+                    checked={sortOrder === "asc"}
+                    onChange={() => setSortOrder("asc")} // Directly set order
+                    className="form-radio h-4 w-4 text-blue-500"
+                  />
+                  <span className="ml-2">Ascending</span>
+                </label>
+                <label className="flex items-center p-2 rounded-md hover:bg-neutral-700 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="sortOrder"
+                    value="desc"
+                    checked={sortOrder === "desc"}
+                    onChange={() => setSortOrder("desc")} // Directly set order
+                    className="form-radio h-4 w-4 text-blue-500"
+                  />
+                  <span className="ml-2">Descending</span>
+                </label>
+              </div>
+            )}
+          </div>
+
+          {/* Clear Filters Button */}
+          {(searchTerm || selectedLanguage !== "All" || selectedVerdict !== "All" || sortBy !== 'submittedAt' || sortOrder !== 'desc') && (
+            <Button
+              variant="tertiary"
+              onClick={clearFilters}
+              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+            >
+              <XCircle size={20} />
+              <span>Clear Filters</span>
+            </Button>
           )}
+        </div>
 
-          {error && !loading && (
-            <motion.p
-              key="error"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-center text-lg text-red-400 py-8"
-            >
-              {error}
-            </motion.p>
-          )}
+        {/* Display selected filters/tags/sort for user clarity */}
+        <div className="flex flex-wrap items-center gap-2 text-gray-400 text-sm">
+          {searchTerm && <span>Search: "{searchTerm}"</span>}
+          {selectedLanguage !== "All" && <span>Language: {selectedLanguage}</span>}
+          {selectedVerdict !== "All" && <span>Verdict: {selectedVerdict}</span>}
+          <span>
+            Sort By:{" "}
+            {sortBy === "submittedAt"
+              ? "Submitted On"
+              : sortBy === "problemTitle"
+              ? "Problem Title"
+              : sortBy === "language"
+              ? "Language"
+              : sortBy === "verdict"
+              ? "Verdict"
+              : sortBy === "runtime"
+              ? "Runtime"
+              : "Memory"}{" "}
+            ({sortOrder === "asc" ? "Asc" : "Desc"})
+          </span>
+        </div>
+      </div>
 
-          {!loading && !error && submissions.length === 0 && (
-            <motion.p
-              key="no-submissions"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-center text-lg text-gray-400 py-8"
-            >
-              No submissions found yet. Start solving problems!
-            </motion.p>
-          )}
 
-          {!loading && !error && submissions.length > 0 && (
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="overflow-x-auto"
-            >
-              <table className="min-w-full bg-gray-700 rounded-lg shadow-lg overflow-hidden">
-                <thead className="bg-gray-600 border-b border-gray-500">
-                  <tr>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
-                      #
-                    </th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
-                      Problem
-                    </th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
-                      Language
-                    </th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
-                      Verdict
-                    </th> {/* Changed from Status to Verdict */}
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
-                      Submitted On
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-600">
-                  {submissions.map((sub, index) => (
-                    <motion.tr
-                      key={sub._id}
-                      variants={itemVariants}
-                      whileHover={{ backgroundColor: "rgba(55, 65, 81, 0.5)" }} // gray-700 with opacity
-                      className="bg-gray-700 transition-colors duration-200"
+      {loading ? (
+        <div className="text-center py-10">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="text-lg text-gray-400 mt-4">Loading submissions...</p>
+        </div>
+      ) : filteredAndSortedSubmissions.length === 0 ? (
+        <div className="text-center py-10">
+          <p className="text-xl text-gray-400">No submissions found matching your criteria.</p>
+          <Button
+            variant="secondary"
+            onClick={clearFilters}
+            className="mt-4 bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700"
+          >
+            Clear Filters
+          </Button>
+        </div>
+      ) : (
+        <div className="bg-neutral-900 rounded-lg shadow-xl overflow-hidden border border-neutral-700">
+          <table className="min-w-full divide-y divide-neutral-700">
+            <thead className="bg-neutral-800">
+              <tr>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSortChange('submittedAt')}
+                >
+                  #
+                  {sortBy === 'submittedAt' && (
+                    <span className="ml-1">{sortOrder === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSortChange('problemTitle')}
+                >
+                  Problem
+                  {sortBy === 'problemTitle' && (
+                    <span className="ml-1">{sortOrder === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSortChange('language')}
+                >
+                  Language
+                  {sortBy === 'language' && (
+                    <span className="ml-1">{sortOrder === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSortChange('verdict')}
+                >
+                  Verdict
+                  {sortBy === 'verdict' && (
+                    <span className="ml-1">{sortOrder === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSortChange('runtime')}
+                >
+                  Runtime (ms)
+                  {sortBy === 'runtime' && (
+                    <span className="ml-1">{sortOrder === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSortChange('memory')}
+                >
+                  Memory (KB)
+                  {sortBy === 'memory' && (
+                    <span className="ml-1">{sortOrder === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSortChange('submittedAt')}
+                >
+                  Submitted On
+                  {sortBy === 'submittedAt' && (
+                    <span className="ml-1">{sortOrder === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-800">
+              {filteredAndSortedSubmissions.map((sub, index) => (
+                <motion.tr
+                  key={sub._id}
+                  variants={itemVariants}
+                  whileHover={{ backgroundColor: "rgba(55, 65, 81, 0.5)" }} // gray-700 with opacity
+                  className="bg-neutral-900 transition-colors duration-200 cursor-pointer" // Start with bg-neutral-900 like ProblemList's tbody rows
+                  onClick={() => navigate(`/submissions/${sub._id}`)} // Navigate to detailed view
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200">
+                    {index + 1}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-400 hover:underline">
+                    {/* Link to problem view page like in ProblemList */}
+                    <Link to={`/problems/${sub.problem?._id}`}>
+                      {sub.problem?.title || "Deleted Problem"}
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    {sub.language}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <Badge
+                      variant={getStatusBadgeVariant(sub.verdict)}
+                      className={`${
+                          getStatusBadgeVariant(sub.verdict) === 'success' ? 'bg-green-500' :
+                          getStatusBadgeVariant(sub.verdict) === 'danger' ? 'bg-red-500' :
+                          getStatusBadgeVariant(sub.verdict) === 'warning' ? 'bg-yellow-500' :
+                          getStatusBadgeVariant(sub.verdict) === 'info' ? 'bg-blue-500' :
+                          'bg-gray-500' // default or dark
+                      } text-white px-2 py-1 rounded-full text-xs`} // Apply ProblemList badge styling
                     >
-                      <td className="py-3 px-4 text-sm text-gray-300">
-                        {index + 1}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-blue-300 hover:text-blue-200 transition-colors">
-                        {/* Assuming problem title is clickable to view problem */}
-                        <a href={`/problems/${sub.problem?._id}`}>
-                          {sub.problem?.title || "Deleted Problem"}
-                        </a>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-300">
-                        {sub.language}
-                      </td>
-                      <td className="py-3 px-4 text-sm">
-                        <Badge variant={getStatusBadgeVariant(sub.verdict)}> {/* Use sub.verdict */}
-                          {sub.verdict}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-400">
-                        {new Date(sub.submittedAt).toLocaleString()}
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </Card>
+                      {sub.verdict}
+                    </Badge>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {sub.runtime !== null && sub.runtime !== undefined ? `${sub.runtime.toFixed(2)}` : "N/A"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {sub.memory !== null && sub.memory !== undefined ? `${sub.memory.toFixed(2)}` : "N/A"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                    {new Date(sub.submittedAt).toLocaleString()}
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+          {/* No pagination for Submission History for now, as it's not in the requirements */}
+          {/* If you want pagination similar to ProblemList, you'd add it here */}
+        </div>
+      )}
     </div>
   );
 };

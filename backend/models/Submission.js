@@ -12,25 +12,40 @@ const submissionSchema = new mongoose.Schema({
   language: { type: String, required: true },
   verdict: {
     type: String,
-    enum: ["Pending", "Accepted", "Wrong Answer", "Time Limit Exceeded", "Runtime Error", "Compilation Error", "Error"], // Expanded verdicts for clarity
+    enum: [
+      "Pending",
+      "Accepted",
+      "Wrong Answer",
+      "Time Limit Exceeded",
+      "Runtime Error",
+      "Compilation Error",
+      "Error",
+    ],
     default: "Pending",
   },
-  runtime: { type: Number }, // Overall runtime (e.g., average or max of accepted tests)
-  memory: { type: Number }, // Overall memory (e.g., max memory usage across tests)
-  errorMessage: { type: String }, // General error message for the submission (e.g., compilation error, server error)
+  runtime: { type: Number }, // Overall runtime
+  memory: { type: Number }, // Overall memory
+  errorMessage: { type: String },
 
-  testResults: [ // Array to store detailed results for each test case
+  testResults: [
     {
       input: { type: String },
-      expectedOutput: { type: String }, // Renamed from 'expected'
-      actualOutput: { type: String },   // Renamed from 'actual'
-      status: { // Status for this specific test case
+      expectedOutput: { type: String },
+      actualOutput: { type: String },
+      status: {
         type: String,
-        enum: ["Accepted", "Wrong Answer", "Time Limit Exceeded", "Runtime Error", "Compilation Error", "Error"],
+        enum: [
+          "Accepted",
+          "Wrong Answer",
+          "Time Limit Exceeded",
+          "Runtime Error",
+          "Compilation Error",
+          "Error",
+        ],
       },
-      time: { type: Number },    // Runtime for this specific test case
-      memory: { type: Number },  // Memory for this specific test case (might be null)
-      details: { type: String }, // Specific error/details for this test case
+      time: { type: Number },
+      memory: { type: Number },
+      details: { type: String },
     },
   ],
 

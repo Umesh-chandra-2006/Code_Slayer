@@ -11,14 +11,19 @@
   },
   "dependencies": {
     "@heroicons/react": "^1.0.6",
+    "@monaco-editor/react": "^4.7.0",
     "@tailwindcss/vite": "^4.1.7",
     "axios": "^1.9.0",
     "framer-motion": "^12.15.0",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.511.0",
+    "monaco-editor": "^0.52.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
-    "react-router-dom": "^7.6.0"
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.6.0",
+    "recharts": "^2.15.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

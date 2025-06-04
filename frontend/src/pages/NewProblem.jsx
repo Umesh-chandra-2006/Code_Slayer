@@ -1,42 +1,164 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion"; // For animations
-import Card from "../components/UI/Card"; // Assuming Card component is available
-import Button from "../components/UI/Button"; // Assuming Button component is available
+import { motion } from "framer-motion";
+import Card from "../components/UI/Card";
+import Button from "../components/UI/Button";
+import Badge from "../components/UI/Badge";
+import axios from "axios";
 
 export default function NewProblem() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ // Renamed setform to setForm for consistency
+  const [form, setForm] = useState({
     title: "",
     description: "",
     inputFormat: "",
     outputFormat: "",
-    sampleInput: "",
-    sampleOutput: "",
+    sampleTestCases: [{ input: "", output: "", explanation: "" }],
     constraints: "",
     difficulty: "Easy",
-    testCases: [{ input: "", output: "" }],
+    testCases: [{ input: "", output: "", isPublic: false }],
+    tags: [],
+    timeLimit: 1000, // Bug 1 Fix: Default time limit in milliseconds for UI
+    memoryLimit: 256,
+    editorial: "",
+    hints: [""],
+    starterCode: { cpp: "" },
+    isPublished: false,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false); // Loading state for form submission
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+  const [generalError, setGeneralError] = useState("");
+  const [token, setToken] = useState(null);
+
+  const [availableTags, setAvailableTags] = useState([]);
+  const [newTagInput, setNewTagInput] = useState("");
+  const [tagsLoading, setTagsLoading] = useState(true);
+  const [tagsError, setTagsError] = useState(null);
+
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+
+  useEffect(() => {
+    setToken(localStorage.getItem("token"));
+  }, []);
+
+  const fetchAvailableTags = useCallback(async () => {
+    try {
+      setTagsLoading(true);
+      setTagsError(null);
+      const response = await axios.get(`${API_BASE_URL}/api/problems/tags`);
+      const uniqueSortedTags = [...new Set(response.data)].sort();
+      setAvailableTags(uniqueSortedTags);
+    } catch (err) {
+      console.error("Error fetching available tags:", err);
+      setTagsError("Failed to load tags. Please ensure backend is running or has tags.");
+    } finally {
+      setTagsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAvailableTags();
+  }, [fetchAvailableTags]);
+
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    let newValue = value;
+
+    // Bug 1 Fix: Convert timeLimit from milliseconds (UI) to seconds (backend)
+    if (name === "timeLimit" && type === "number") {
+      newValue = Number(value); // Store as milliseconds in state for UI
+    } else if (type === "number") {
+      newValue = Number(value);
+    } else if (type === "checkbox") {
+      newValue = checked;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: newValue,
+    }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleTestCaseChange = (idx, field, value) => {
     const newTestCases = [...form.testCases];
     newTestCases[idx][field] = value;
     setForm((prev) => ({ ...prev, testCases: newTestCases }));
+    if (errors.testCases) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.testCases;
+        return newErrors;
+      });
+    }
   };
+
+  const handleSampleTestCaseChange = (idx, field, value) => {
+    const newSampleTestCases = [...form.sampleTestCases];
+    newSampleTestCases[idx][field] = value;
+    setForm((prev) => ({ ...prev, sampleTestCases: newSampleTestCases }));
+    if (errors.sampleTestCases) { // Bug 2 Fix: Clear sampleTestCases error
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.sampleTestCases;
+        return newErrors;
+      });
+    }
+  };
+
+  const handleHintChange = (idx, value) => {
+    const newHints = [...form.hints];
+    newHints[idx] = value;
+    setForm((prev) => ({ ...prev, hints: newHints }));
+    if (errors.hints) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.hints;
+        return newErrors;
+      });
+    }
+  };
+
+  const handleStarterCodeChange = (language, value) => {
+    setForm((prev) => ({
+      ...prev,
+      starterCode: {
+        ...prev.starterCode,
+        [language]: value,
+      },
+    }));
+    if (errors[`starterCode.${language}`]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[`starterCode.${language}`];
+        return newErrors;
+      });
+    }
+  };
+
 
   const addTestCase = () => {
     setForm((prev) => ({
       ...prev,
-      testCases: [...prev.testCases, { input: "", output: "" }],
+      testCases: [...prev.testCases, { input: "", output: "", isPublic: false }],
     }));
+    if (errors.testCases) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.testCases;
+        return newErrors;
+      });
+    }
   };
 
   const removeTestCase = (idx) => {
@@ -44,49 +166,221 @@ export default function NewProblem() {
       ...prev,
       testCases: prev.testCases.filter((_, i) => i !== idx),
     }));
+    if (errors.testCases) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.testCases;
+        return newErrors;
+      });
+    }
+  };
+
+  const addSampleTestCase = () => {
+    setForm((prev) => ({
+      ...prev,
+      sampleTestCases: [...prev.sampleTestCases, { input: "", output: "", explanation: "" }],
+    }));
+    if (errors.sampleTestCases) { // Bug 2 Fix: Clear error when adding a new one
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.sampleTestCases;
+        return newErrors;
+      });
+    }
+  };
+
+  const removeSampleTestCase = (idx) => {
+    setForm((prev) => ({
+      ...prev,
+      sampleTestCases: prev.sampleTestCases.filter((_, i) => i !== idx),
+    }));
+    if (errors.sampleTestCases) { // Bug 2 Fix: Clear error when removing one
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.sampleTestCases;
+        return newErrors;
+      });
+    }
+  };
+
+  const addHint = () => {
+    setForm((prev) => ({
+      ...prev,
+      hints: [...prev.hints, ""],
+    }));
+    if (errors.hints) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.hints;
+        return newErrors;
+      });
+    }
+  };
+
+  const removeHint = (idx) => {
+    setForm((prev) => ({
+      ...prev,
+      hints: prev.hints.filter((_, i) => i !== idx),
+    }));
+    if (errors.hints) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.hints;
+        return newErrors;
+      });
+    }
+  };
+
+
+  const handleTagToggle = (tag) => {
+    setForm((prev) => {
+      const currentTags = prev.tags;
+      if (currentTags.includes(tag)) {
+        return { ...prev, tags: currentTags.filter((t) => t !== tag) };
+      } else {
+        // Bug 3 Fix: Clear tags error if a tag is added/removed
+        if (errors.tags) {
+            setErrors(prevErrors => {
+                const newErrors = { ...prevErrors };
+                delete newErrors.tags;
+                return newErrors;
+            });
+        }
+        return { ...prev, tags: [...currentTags, tag] };
+      }
+    });
+  };
+
+  const handleAddTag = () => {
+    const trimmedTag = newTagInput.trim();
+    if (trimmedTag) {
+      if (!availableTags.includes(trimmedTag)) {
+        setAvailableTags((prev) => [...prev, trimmedTag].sort());
+      }
+      if (!form.tags.includes(trimmedTag)) {
+        setForm((prev) => ({ ...prev, tags: [...prev.tags, trimmedTag] }));
+        if (errors.tags) { // Bug 3 Fix: Clear tags error if a tag is added
+            setErrors(prevErrors => {
+                const newErrors = { ...prevErrors };
+                delete newErrors.tags;
+                return newErrors;
+            });
+        }
+      }
+    }
+    setNewTagInput("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
-    setError("");
+    setErrors({});
+    setGeneralError("");
     setIsSubmitting(true);
 
+    if (!token) {
+      setGeneralError("Authentication token not found. Please log in.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const newErrors = {};
+
+    // Bug 2 Fix: Validate Sample Test Cases
+    if (form.sampleTestCases.length === 0) {
+        newErrors.sampleTestCases = "At least one sample test case is required.";
+    } else {
+        const hasEmptySample = form.sampleTestCases.some(tc => tc.input.trim() === '' || tc.output.trim() === '');
+        if (hasEmptySample) {
+            newErrors.sampleTestCases = "All sample test cases must have input and output values.";
+        }
+    }
+
+    // Bug 3 Fix: Validate Tags
+    if (form.tags.length === 0) {
+        newErrors.tags = "At least one tag must be selected.";
+    }
+
+    // Bug 5 Fix: Validate Editorial
+    if (form.editorial.trim() === '') {
+        newErrors.editorial = "Editorial is required.";
+    }
+
+    // Bug 5 Fix: Validate Starter Code
+    if (form.starterCode.cpp.trim() === '') {
+        newErrors['starterCode.cpp'] = "Starter code for C++ is required.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        setGeneralError("Please correct the highlighted errors before submitting.");
+        setIsSubmitting(false);
+        return;
+    }
+
+    // Bug 6 Fix: Confirmation Dialog
+    let confirmationMessage = "";
+    if (form.isPublished) {
+        confirmationMessage = "Are you sure you want to PUBLISH this problem immediately?";
+    } else {
+        confirmationMessage = "Are you sure you want to save this problem as a DRAFT?";
+    }
+
+    if (!window.confirm(confirmationMessage)) {
+        setIsSubmitting(false);
+        return; // User cancelled
+    }
+
+
     try {
-      const res = await fetch("http://localhost:5000/api/problems", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+      const problemData = {
+        ...form,
+        timeLimit: Number(form.timeLimit),
+        memoryLimit: Number(form.memoryLimit),
+        hints: form.hints.filter(hint => hint.trim() !== ''), // Filter out empty hints
+      };
+
+      const res = await axios.post(`${API_BASE_URL}/api/problems`, problemData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      if (res.ok) {
-        setMessage("Problem created successfully!");
-        // Optionally clear form or redirect after a short delay
-        setForm({
-          title: "",
-          description: "",
-          inputFormat: "",
-          outputFormat: "",
-          sampleInput: "",
-          sampleOutput: "",
-          constraints: "",
-          difficulty: "Easy",
-          testCases: [{ input: "", output: "" }],
-        });
-        setTimeout(() => navigate("/problems"), 1500); // Redirect to problem list
-      } else {
-        const errorData = await res.json();
-        setError(errorData.message || "Failed to create problem.");
-      }
+      setMessage("Problem created successfully!");
+      setForm({
+        title: "",
+        description: "",
+        inputFormat: "",
+        outputFormat: "",
+        sampleTestCases: [{ input: "", output: "", explanation: "" }],
+        constraints: "",
+        difficulty: "Easy",
+        testCases: [{ input: "", output: "", isPublic: false }],
+        tags: [],
+        timeLimit: 1000, // Bug 1 Fix: Reset to milliseconds for UI
+        memoryLimit: 256,
+        editorial: "",
+        hints: [""],
+        starterCode: { cpp: "" },
+        isPublished: false,
+      });
+      fetchAvailableTags();
+      setTimeout(() => navigate("/problems"), 1500);
+
     } catch (err) {
-      console.error("Error creating problem:", err);
-      setError("Server error during problem creation.");
+      console.error("Error creating problem:", err.response?.data || err);
+      if (err.response && err.response.status === 400 && err.response.data.errors) {
+        setErrors(err.response.data.errors);
+        setGeneralError(err.response.data.message || "Please correct the highlighted errors.");
+      } else {
+        setGeneralError(err.response?.data?.message || err.message || "Failed to create problem.");
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Animation variants for framer-motion
   const formVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
@@ -95,7 +389,7 @@ export default function NewProblem() {
   return (
     <div className="min-h-screen bg-gray-900 p-8 text-gray-100 flex items-center justify-center">
       <motion.div
-        className="w-full max-w-2xl"
+        className="w-full max-w-4xl"
         initial="hidden"
         animate="visible"
         variants={formVariants}
@@ -105,7 +399,6 @@ export default function NewProblem() {
             Create New Problem
           </h2>
 
-          {/* Message and Error Display */}
           {message && (
             <motion.p
               initial={{ opacity: 0 }}
@@ -115,13 +408,13 @@ export default function NewProblem() {
               {message}
             </motion.p>
           )}
-          {error && (
+          {generalError && (
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="bg-red-500/20 text-red-300 p-3 rounded-lg mb-4 text-center border border-red-500"
             >
-              {error}
+              {generalError}
             </motion.p>
           )}
 
@@ -136,9 +429,10 @@ export default function NewProblem() {
                 name="title"
                 value={form.title}
                 onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${errors.title ? 'border-red-500' : 'border-gray-600'} text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 required
               />
+              {errors.title && <p className="text-red-400 text-sm mt-1">{errors.title}</p>}
             </div>
 
             <div>
@@ -151,9 +445,67 @@ export default function NewProblem() {
                 value={form.description}
                 onChange={handleChange}
                 rows="5"
-                className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${errors.description ? 'border-red-500' : 'border-gray-600'} text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 required
               ></textarea>
+              {errors.description && <p className="text-red-400 text-sm mt-1">{errors.description}</p>}
+            </div>
+
+            {/* Tags selection UI */}
+            <div>
+              <label className="block text-gray-300 text-sm font-bold mb-2">
+                Tags:
+              </label>
+              {tagsLoading ? (
+                <p className="text-gray-400 text-sm p-3">Loading tags...</p>
+              ) : tagsError ? (
+                <p className="text-red-500 text-sm p-3 border border-red-500 rounded-lg">{tagsError}</p>
+              ) : (
+                <div className={`flex flex-wrap gap-2 p-3 bg-gray-700 rounded-lg border ${errors.tags ? 'border-red-500' : 'border-gray-600'}`}>
+                  {availableTags.length === 0 ? (
+                    <p className="text-gray-400 text-sm">No tags available. Add new tags below.</p>
+                  ) : (
+                    availableTags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        className={`cursor-pointer px-3 py-1 rounded-full text-sm ${
+                          form.tags.includes(tag)
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-600 text-gray-300 hover:bg-gray-500"
+                        }`}
+                        onClick={() => handleTagToggle(tag)}
+                      >
+                        {tag}
+                      </Badge>
+                    ))
+                  )}
+                </div>
+              )}
+              <div className="mt-4 flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Create new tag..."
+                  value={newTagInput}
+                  onChange={(e) => setNewTagInput(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddTag();
+                    }
+                  }}
+                  className="flex-1 px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleAddTag}
+                  className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg"
+                  disabled={!newTagInput.trim()}
+                >
+                  Add Tag
+                </Button>
+              </div>
+              {errors.tags && <p className="text-red-400 text-sm mt-1">{errors.tags}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -167,8 +519,9 @@ export default function NewProblem() {
                   value={form.inputFormat}
                   onChange={handleChange}
                   rows="3"
-                  className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${errors.inputFormat ? 'border-red-500' : 'border-gray-600'} text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 ></textarea>
+                {errors.inputFormat && <p className="text-red-400 text-sm mt-1">{errors.inputFormat}</p>}
               </div>
               <div>
                 <label htmlFor="outputFormat" className="block text-gray-300 text-sm font-semibold mb-2">
@@ -180,39 +533,77 @@ export default function NewProblem() {
                   value={form.outputFormat}
                   onChange={handleChange}
                   rows="3"
-                  className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${errors.outputFormat ? 'border-red-500' : 'border-gray-600'} text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 ></textarea>
+                {errors.outputFormat && <p className="text-red-400 text-sm mt-1">{errors.outputFormat}</p>}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="sampleInput" className="block text-gray-300 text-sm font-semibold mb-2">
-                  Sample Input:
-                </label>
-                <textarea
-                  id="sampleInput"
-                  name="sampleInput"
-                  value={form.sampleInput}
-                  onChange={handleChange}
-                  rows="3"
-                  className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                ></textarea>
-              </div>
-              <div>
-                <label htmlFor="sampleOutput" className="block text-gray-300 text-sm font-semibold mb-2">
-                  Sample Output:
-                </label>
-                <textarea
-                  id="sampleOutput"
-                  name="sampleOutput"
-                  value={form.sampleOutput}
-                  onChange={handleChange}
-                  rows="3"
-                  className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                ></textarea>
-              </div>
+            {/* New: Sample Test Cases Section */}
+            <div className={`border rounded-lg p-5 bg-gray-800/50 ${errors.sampleTestCases ? 'border-red-500' : 'border-gray-600'}`}>
+                <h3 className="text-xl font-semibold text-white mb-4">Sample Test Cases (Public)</h3>
+                {form.sampleTestCases.map((sample, idx) => (
+                    <div key={`sample-${idx}`} className="flex flex-col gap-4 mb-4 p-4 border border-gray-700 rounded-lg bg-gray-700/50">
+                        <div>
+                            <label htmlFor={`sampleInput-${idx}`} className="block text-gray-400 text-sm font-medium mb-1">
+                                Sample Input {idx + 1}:
+                            </label>
+                            <textarea
+                                id={`sampleInput-${idx}`}
+                                placeholder="Sample Test Case Input"
+                                rows={2}
+                                value={sample.input}
+                                onChange={(e) => handleSampleTestCaseChange(idx, "input", e.target.value)}
+                                className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor={`sampleOutput-${idx}`} className="block text-gray-400 text-sm font-medium mb-1">
+                                Sample Expected Output {idx + 1}:
+                            </label>
+                            <textarea
+                                id={`sampleOutput-${idx}`}
+                                placeholder="Sample Expected Output"
+                                rows={2}
+                                value={sample.output}
+                                onChange={(e) => handleSampleTestCaseChange(idx, "output", e.target.value)}
+                                className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor={`sampleExplanation-${idx}`} className="block text-gray-400 text-sm font-medium mb-1">
+                                Explanation {idx + 1} (Optional):
+                            </label>
+                            <textarea
+                                id={`sampleExplanation-${idx}`}
+                                placeholder="Explanation for sample test case"
+                                rows={2}
+                                value={sample.explanation}
+                                onChange={(e) => handleSampleTestCaseChange(idx, "explanation", e.target.value)}
+                                className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                        </div>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={() => removeSampleTestCase(idx)}
+                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 mt-2"
+                        >
+                            Remove Sample
+                        </Button>
+                    </div>
+                ))}
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addSampleTestCase}
+                    className="w-full py-2 border-dashed border-blue-500 text-blue-400 hover:bg-blue-900/20"
+                >
+                    Add Sample Test Case
+                </Button>
+                {errors.sampleTestCases && <p className="text-red-400 text-sm mt-2">{errors.sampleTestCases}</p>}
             </div>
+
 
             <div>
               <label htmlFor="constraints" className="block text-gray-300 text-sm font-semibold mb-2">
@@ -224,8 +615,46 @@ export default function NewProblem() {
                 value={form.constraints}
                 onChange={handleChange}
                 rows="3"
-                className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${errors.constraints ? 'border-red-500' : 'border-gray-600'} text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
               ></textarea>
+              {errors.constraints && <p className="text-red-400 text-sm mt-1">{errors.constraints}</p>}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label htmlFor="timeLimit" className="block text-gray-300 text-sm font-semibold mb-2">
+                        Time Limit (milliseconds): {/* Bug 1 Fix: Label changed */}
+                    </label>
+                    <input
+                        type="number"
+                        id="timeLimit"
+                        name="timeLimit"
+                        value={form.timeLimit}
+                        onChange={handleChange}
+                        className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${errors.timeLimit ? 'border-red-500' : 'border-gray-600'} text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        min="1" // Minimum reasonable time limit in ms
+                        step="1" // Allow integer values
+                        required
+                    />
+                    {errors.timeLimit && <p className="text-red-400 text-sm mt-1">{errors.timeLimit}</p>}
+                </div>
+                <div>
+                    <label htmlFor="memoryLimit" className="block text-gray-300 text-sm font-semibold mb-2">
+                        Memory Limit (MB):
+                    </label>
+                    <input
+                        type="number"
+                        id="memoryLimit"
+                        name="memoryLimit"
+                        value={form.memoryLimit}
+                        onChange={handleChange}
+                        className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${errors.memoryLimit ? 'border-red-500' : 'border-gray-600'} text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        min="1"
+                        step="1"
+                        required
+                    />
+                    {errors.memoryLimit && <p className="text-red-400 text-sm mt-1">{errors.memoryLimit}</p>}
+                </div>
             </div>
 
             <div>
@@ -237,20 +666,92 @@ export default function NewProblem() {
                 name="difficulty"
                 value={form.difficulty}
                 onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${errors.difficulty ? 'border-red-500' : 'border-gray-600'} text-white focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 required
               >
                 <option value="Easy">Easy</option>
                 <option value="Medium">Medium</option>
                 <option value="Hard">Hard</option>
               </select>
+              {errors.difficulty && <p className="text-red-400 text-sm mt-1">{errors.difficulty}</p>}
             </div>
 
+            {/* Editorial Section */}
+            <div>
+                <label htmlFor="editorial" className="block text-gray-300 text-sm font-semibold mb-2">
+                    Editorial:
+                </label>
+                <textarea
+                    id="editorial"
+                    name="editorial"
+                    value={form.editorial}
+                    onChange={handleChange}
+                    rows="8"
+                    placeholder="Provide a detailed editorial for the problem solution..."
+                    className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${errors.editorial ? 'border-red-500' : 'border-gray-600'} text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    required // Bug 5 Fix: Made required
+                ></textarea>
+                {errors.editorial && <p className="text-red-400 text-sm mt-1">{errors.editorial}</p>}
+            </div>
+
+            {/* Hints Section */}
+            <div className={`border rounded-lg p-5 bg-gray-800/50 ${errors.hints ? 'border-red-500' : 'border-gray-600'}`}>
+                <h3 className="text-xl font-semibold text-white mb-4">Hints (Optional)</h3> {/* Bug 4 Fix: Added optional label */}
+                {form.hints.map((hint, idx) => (
+                    <div key={`hint-${idx}`} className="flex gap-4 mb-4 items-center">
+                        <textarea
+                            id={`hint-${idx}`}
+                            placeholder={`Hint ${idx + 1}`}
+                            rows={2}
+                            value={hint}
+                            onChange={(e) => handleHintChange(idx, e.target.value)}
+                            className="flex-1 px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={() => removeHint(idx)}
+                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2"
+                        >
+                            Remove
+                        </Button>
+                    </div>
+                ))}
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addHint}
+                    className="w-full py-2 border-dashed border-blue-500 text-blue-400 hover:bg-blue-900/20"
+                >
+                    Add Hint
+                </Button>
+                {errors.hints && <p className="text-red-400 text-sm mt-2">{errors.hints}</p>}
+            </div>
+
+            {/* Starter Code Section */}
+            <div>
+                <label htmlFor="starterCodeCpp" className="block text-gray-300 text-sm font-semibold mb-2">
+                    Starter Code (C++):
+                </label>
+                <textarea
+                    id="starterCodeCpp"
+                    name="starterCodeCpp"
+                    value={form.starterCode.cpp}
+                    onChange={(e) => handleStarterCodeChange("cpp", e.target.value)}
+                    rows="10"
+                    placeholder="Provide starter code for C++ (e.g., function signature, boilerplate code)"
+                    className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${errors['starterCode.cpp'] ? 'border-red-500' : 'border-gray-600'} text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm`}
+                    required // Bug 5 Fix: Made required
+                ></textarea>
+                {errors['starterCode.cpp'] && <p className="text-red-400 text-sm mt-1">{errors['starterCode.cpp']}</p>}
+            </div>
+
+
             {/* Test Cases Section */}
-            <div className="border border-gray-600 rounded-lg p-5 bg-gray-800/50">
-              <h3 className="text-xl font-semibold text-white mb-4">Test Cases</h3>
+            <div className={`border rounded-lg p-5 bg-gray-800/50 ${errors.testCases ? 'border-red-500' : 'border-gray-600'}`}>
+              <h3 className="text-xl font-semibold text-white mb-4">Hidden Test Cases (Private)</h3>
               {form.testCases.map((tc, idx) => (
-                <div key={idx} className="flex flex-col md:flex-row gap-4 mb-4 p-4 border border-gray-700 rounded-lg bg-gray-700/50">
+                <div key={`hidden-${idx}`} className="flex flex-col md:flex-row gap-4 mb-4 p-4 border border-gray-700 rounded-lg bg-gray-700/50">
                   <div className="flex-1">
                     <label htmlFor={`input-${idx}`} className="block text-gray-400 text-sm font-medium mb-1">
                       Input {idx + 1}:
@@ -262,6 +763,7 @@ export default function NewProblem() {
                       value={tc.input}
                       onChange={(e) => handleTestCaseChange(idx, "input", e.target.value)}
                       className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      required
                     />
                   </div>
                   <div className="flex-1">
@@ -275,12 +777,23 @@ export default function NewProblem() {
                       value={tc.output}
                       onChange={(e) => handleTestCaseChange(idx, "output", e.target.value)}
                       className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      required
                     />
                   </div>
-                  <div className="flex items-end">
+                  <div className="flex items-end justify-between md:justify-start gap-4 mt-2 md:mt-0">
+                    <label htmlFor={`isPublic-${idx}`} className="flex items-center text-gray-300 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        id={`isPublic-${idx}`}
+                        checked={tc.isPublic}
+                        onChange={(e) => handleTestCaseChange(idx, "isPublic", e.target.checked)}
+                        className="form-checkbox h-4 w-4 text-blue-500 transition duration-150 ease-in-out bg-gray-700 border-gray-500 rounded"
+                      />
+                      <span className="ml-2 text-sm">Make Public</span>
+                    </label>
                     <Button
                       type="button"
-                      variant="secondary"
+                      variant="destructive"
                       onClick={() => removeTestCase(idx)}
                       className="bg-red-600 hover:bg-red-700 text-white px-4 py-2"
                     >
@@ -295,9 +808,28 @@ export default function NewProblem() {
                 onClick={addTestCase}
                 className="w-full py-2 border-dashed border-blue-500 text-blue-400 hover:bg-blue-900/20"
               >
-                Add Test Case
+                Add Hidden Test Case
               </Button>
+              {errors.testCases && <p className="text-red-400 text-sm mt-2">{errors.testCases}</p>}
             </div>
+
+            {/* Is Published Checkbox */}
+            <div className="flex items-center gap-2">
+                <input
+                    type="checkbox"
+                    id="isPublished"
+                    name="isPublished"
+                    checked={form.isPublished}
+                    onChange={handleChange}
+                    className="form-checkbox h-5 w-5 text-purple-600 transition duration-150 ease-in-out bg-gray-700 border-gray-500 rounded"
+                />
+                <label htmlFor="isPublished" className="text-gray-300 text-base font-semibold cursor-pointer">
+                    Publish Problem Immediately
+                </label>
+                <p className="text-gray-400 text-sm ml-4">(Unchecked means it will be saved as a draft)</p>
+            </div>
+            {errors.isPublished && <p className="text-red-400 text-sm mt-1">{errors.isPublished}</p>}
+
 
             <div className="flex justify-end gap-4 mt-8">
               <Button

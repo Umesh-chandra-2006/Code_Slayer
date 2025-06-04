@@ -1,4 +1,3 @@
-// src/components/UI/Input.jsx
 import React from 'react';
 
 const Input = ({ type = 'text', placeholder, value, onChange, className = '', ...props }) => {

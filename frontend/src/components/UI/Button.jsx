@@ -1,4 +1,3 @@
-// src/components/UI/Button.jsx
 import React from 'react';
 
 const Button = ({ children, onClick, type = 'button', variant = 'primary', className = '', ...props }) => {
@@ -12,7 +11,6 @@ const Button = ({ children, onClick, type = 'button', variant = 'primary', class
   } else if (variant === 'danger') {
     baseClasses += 'bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50';
   }
-  // Add more variants as needed (e.g., 'outline', 'text')
 
   return (
     <button
