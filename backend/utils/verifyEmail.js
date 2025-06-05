@@ -8,7 +8,7 @@ const verifyEmail = async (email) => {
 
     return data.is_valid_format.value && data.deliverability == "DELIVERABLE";
   } catch (err) {
-    console.log("Email verification failed", err);
+    console.error("Email verification failed", err);
     return false;
   }
 };

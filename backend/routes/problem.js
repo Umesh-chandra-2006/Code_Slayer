@@ -1,17 +1,22 @@
 const express = require("express");
 const router = express.Router();
+const { apiLimiter } = require("../middleware/rateLimitMiddleware");
 const {
   getallproblems,
   getproblembyId,
   createproblem,
   updateproblem,
   deleteproblem,
+  getalltags,
 } = require("../controllers/problemController");
 
-router.get("/", getallproblems);
-router.get("/:id", getproblembyId);
-router.post("/", createproblem);
-router.put("/:id", updateproblem);
-router.delete("/:id", deleteproblem);
+const { isAuthenticated, isAdmin } = require("../middleware/authMiddleware");
+
+router.get("/", isAuthenticated, apiLimiter, getallproblems);
+router.get("/tags", isAuthenticated, apiLimiter, getalltags);
+router.get("/:id", isAuthenticated, apiLimiter, getproblembyId);
+router.post("/", isAuthenticated, isAdmin, apiLimiter, createproblem);
+router.put("/:id", isAuthenticated, isAdmin, apiLimiter, updateproblem);
+router.delete("/:id", isAuthenticated, isAdmin, apiLimiter, deleteproblem);
 
 module.exports = router;

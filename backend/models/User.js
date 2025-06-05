@@ -18,7 +18,11 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength:8,
+      minlength: 8,
+    },
+    role: {
+      type: String,
+      default: "user",
     },
     resetPasswordToken: {
       type: String,
@@ -27,6 +31,15 @@ const UserSchema = new mongoose.Schema(
     resetPasswordExpire: {
       type: Date,
       default: null,
+    },
+    solvedProblems: [{ type: mongoose.Schema.Types.ObjectId, ref: "Problem" }],
+    problemSolvedCount: {
+      type: Number,
+      default: 0,
+    },
+    totalScore: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }
