@@ -35,7 +35,7 @@ const DashboardLayout = () => {
       >
         <div className="flex items-center">
           <span className="text-2xl font-bold text-blue-400">GG</span>
-          <span className="text-2xl font-bold text-white ml-1">ALGO SLAYER</span>
+          <span className="text-2xl font-bold text-white ml-1">CODE SLAYER</span>
         </div>
 
         <Link

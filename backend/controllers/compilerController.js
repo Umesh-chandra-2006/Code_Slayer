@@ -1,6 +1,5 @@
 const Problem = require("../models/Problem");
 const axios = require("axios");
-//Code Execution for custom input
 
 const COMPILER_BACKEND_URL = process.env.COMPILER_BACKEND_URL;
 const runCppCode = async (req, res) => {
@@ -11,32 +10,27 @@ const runCppCode = async (req, res) => {
   }
 
   try {
-    // Make an HTTP POST request to the Compiler Backend's /execute endpoint
     const response = await axios.post(`${COMPILER_BACKEND_URL}/execute`, {
       language,
       code,
       input,
     });
 
-    // The compiler backend's response should already be in the format the frontend expects.
-    // Forward the Compiler Backend's response directly back to the frontend.
     return res.status(response.status).json(response.data);
   } catch (err) {
     console.error("Error in runCppCode (Main Backend Proxy):", err.message);
-    // Handle errors that come back from the Compiler Backend or network issues
     const status = err.response ? err.response.status : 500;
     const data = err.response
       ? err.response.data
       : {
           success: false,
-          compilationError: null, // Assume unknown error for proxy if no specific info
+          compilationError: null, 
           runtimeError: null,
           output: "",
           time: null,
           memory: null,
           error: "Internal Server Error during code execution.",
         };
-    // If the compiler backend returned specific error details, pass them through
     if (
       err.response &&
       err.response.data &&
@@ -48,7 +42,7 @@ const runCppCode = async (req, res) => {
       data.runtimeError = err.response.data.runtimeError;
     }
     if (err.response && err.response.data && err.response.data.output) {
-      data.output = err.response.data.output; // In case compiler backend returned some output with error
+      data.output = err.response.data.output; 
     }
     if (err.response && err.response.data && err.response.data.time) {
       data.time = err.response.data.time;
@@ -57,11 +51,10 @@ const runCppCode = async (req, res) => {
       data.memory = err.response.data.memory;
     }
     if (err.response && err.response.data && err.response.data.error) {
-      data.error = err.response.data.error; // Generic error message from compiler backend
+      data.error = err.response.data.error; 
     }
     return res.status(status).json(data);
   }
-  // No finally block here, as file cleanup is now the Compiler Backend's responsibility
 };
 
 // Code execution for testing against problem's test cases (public tests)
@@ -85,25 +78,22 @@ const testAgainstAllCases = async (req, res) => {
     const response = await axios.post(`${COMPILER_BACKEND_URL}/judge`, {
       code: code,
       language: language,
-      // Pass only necessary problem details for judging to the Compiler Backend
       problemDetails: {
         _id: problem._id,
-        testCases: problem.testCases, // This is crucial!
+        testCases: problem.testCases,
         timeLimit: problem.timeLimit,
         memoryLimit: problem.memoryLimit,
-        // Include any other constraints your judgingEngine needs
       },
-      isSubmission: false, // Indicate it's a "run" for public tests, not a formal "submission"
+      isSubmission: false, 
     });
 
     // 3. Forward the Compiler Backend's response directly back to the frontend
-    // The compiler backend's response should be in the format { overallVerdict, compilationError, detailedTestResults }
     const { overallVerdict, compilationError, testResults } = response.data;
     return res.status(response.status).json({
       success: true,
       overallVerdict: overallVerdict,
       compilationError: compilationError,
-      testResults: Array.isArray(testResults) ? testResults : [], // Ensure it's an array for frontend
+      testResults: Array.isArray(testResults) ? testResults : [], 
     });
   } catch (err) {
     console.error(
@@ -117,9 +107,8 @@ const testAgainstAllCases = async (req, res) => {
           success: false,
           compilationError: "Unknown error during testing.",
           testResults: [],
-          overallVerdict: "Error", // Default verdict on proxy error
+          overallVerdict: "Error",
         };
-    // If the compiler backend returned specific error details, pass them through
     if (
       err.response &&
       err.response.data &&

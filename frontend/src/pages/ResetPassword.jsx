@@ -17,18 +17,28 @@ export default function ResetPassword() {
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+  // === MOVE THESE FUNCTIONS HERE, OUTSIDE OF handleSubmit ===
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setConfirmShowPassword(!showConfirmPassword);
+  };
+  // =========================================================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
     setError("");
 
-    const togglePasswordVisibility = () => {
-      setShowPassword(!showPassword);
-    };
-
-    const toggleConfirmPasswordVisibility = () => {
-      setConfirmShowPassword(!showConfirmPassword);
-    };
+    // These functions should NOT be defined here
+    // const togglePasswordVisibility = () => { // <--- REMOVE THESE LINES
+    //   setShowPassword(!showPassword);
+    // };
+    // const toggleConfirmPasswordVisibility = () => { // <--- REMOVE THESE LINES
+    //   setConfirmShowPassword(!showConfirmPassword);
+    // };
 
     if (!password || !confirmPassword) {
       setError("Please fill in all fields.");
@@ -41,7 +51,6 @@ export default function ResetPassword() {
     }
 
     if (password.length < 8) {
-      // Added password length check
       setError("Password must be at least 8 characters long.");
       return;
     }
@@ -146,7 +155,7 @@ export default function ResetPassword() {
             />
             <button
               type="button" // Important: type="button" to prevent form submission
-              onClick={togglePasswordVisibility}
+              onClick={togglePasswordVisibility} // This will now work
               className="absolute inset-y-0 right-0 top-7 pr-3 flex items-center text-gray-400 hover:text-gray-200 focus:outline-none"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
@@ -174,7 +183,7 @@ export default function ResetPassword() {
             />
             <button
               type="button" // Important: type="button" to prevent form submission
-              onClick={toggleConfirmPasswordVisibility}
+              onClick={toggleConfirmPasswordVisibility} // This will now work
               className="absolute inset-y-0 right-0 top-7 pr-3 flex items-center text-gray-400 hover:text-gray-200 focus:outline-none"
               aria-label={
                 showConfirmPassword ? "Hide password" : "Show password"

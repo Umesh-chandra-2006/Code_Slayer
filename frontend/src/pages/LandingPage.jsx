@@ -30,7 +30,7 @@ export default function LandingPage() {
             <span className="text-white font-extrabold text-lg">OJ</span>
           </div>
           <h1 className="text-3xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent tracking-tight">
-            CodeJudge
+            CodeSlayer
           </h1>
         </div>
         <div>
@@ -74,7 +74,7 @@ export default function LandingPage() {
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-6">
               Master Your Code with{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                CodeJudge
+                CodeSlayer
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
@@ -167,7 +167,7 @@ export default function LandingPage() {
           >
             Why Choose{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-              CodeJudge
+              CodeSlayer
             </span>
             ?
           </motion.h2>
@@ -330,7 +330,7 @@ export default function LandingPage() {
       <footer className="py-10 bg-gray-950 text-gray-500 text-center border-t border-gray-800">
         <div className="container mx-auto px-6">
           <p className="mb-4">
-            © {new Date().getFullYear()} CodeJudge. All rights reserved.
+            © {new Date().getFullYear()} CodeSlayer. All rights reserved.
           </p>
           <div className="flex justify-center gap-8 text-gray-400">
             <a href="#" className="hover:text-white transition-colors text-sm">
