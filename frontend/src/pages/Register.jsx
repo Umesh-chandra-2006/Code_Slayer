@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom"; // Import Link for navigation
-import { motion } from "framer-motion"; // For animations
+import { useNavigate, Link } from "react-router-dom"; 
+import { motion } from "framer-motion"; 
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function Register() {
@@ -18,7 +18,7 @@ export default function Register() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [cooldown, setCooldown] = useState(0);
-  const [isLoading, setIsLoading] = useState(false); // New loading state for API calls
+  const [isLoading, setIsLoading] = useState(false); 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setConfirmShowPassword] = useState(false);
 
@@ -42,7 +42,7 @@ export default function Register() {
   const handleChanges = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error message for the specific field if valid
+
     if (name === "password" || name === "confirm_password") {
       if (
         formData.password &&
@@ -58,7 +58,7 @@ export default function Register() {
     e.preventDefault();
     setMessage("");
     setError("");
-    setIsLoading(true); // Start loading
+    setIsLoading(true); 
 
     if (formData.password !== formData.confirm_password) {
       setError("Passwords do not match.");
@@ -84,8 +84,8 @@ export default function Register() {
           data.message ||
             "Registration successful! Please check your email for a verification code."
         );
-        setStep(2); // Move to verification step
-        setCooldown(60); // Start cooldown for resend button
+        setStep(2); 
+        setCooldown(60); 
       } else {
         setError(data.message || "Registration failed.");
       }
@@ -93,7 +93,7 @@ export default function Register() {
       console.error("Error during registration:", err);
       setError("Server error. Please try again later.");
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false); 
     }
   };
 
@@ -101,7 +101,7 @@ export default function Register() {
     e.preventDefault();
     setMessage("");
     setError("");
-    setIsLoading(true); // Start loading
+    setIsLoading(true); 
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/auth/verification`, {
@@ -130,14 +130,14 @@ export default function Register() {
       console.error("Error during verification:", err);
       setError("Server error during verification. Please try again later.");
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false); 
     }
   };
 
   const handlResend = async () => {
     setMessage("");
     setError("");
-    setIsLoading(true); // Start loading
+    setIsLoading(true); 
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/auth/resend-code`, {
@@ -150,7 +150,7 @@ export default function Register() {
 
       if (res.ok) {
         setMessage(data.message || "Verification code resent!");
-        setCooldown(60); // Reset cooldown
+        setCooldown(60); 
       } else {
         setError(data.message || "Failed to resend code.");
       }
@@ -158,11 +158,11 @@ export default function Register() {
       console.error("Error resending code:", err);
       setError("Server error when resending code. Please try again later.");
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false);
     }
   };
 
-  // Animation variants for framer-motion
+
   const formVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: {
@@ -274,7 +274,7 @@ export default function Register() {
                 autoComplete="new-password"
               />
               <button
-                type="button" // Important: type="button" to prevent form submission
+                type="button" 
                 onClick={togglePasswordVisibility}
                 className="absolute inset-y-0 right-0 top-7 pr-3 flex items-center text-gray-400 hover:text-gray-200 focus:outline-none"
                 aria-label={showPassword ? "Hide password" : "Show password"}
@@ -293,7 +293,7 @@ export default function Register() {
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 id="confirm_password"
-                name="confirm_password" // Keep original name 'confirm_password' to track separately
+                name="confirm_password" 
                 value={formData.confirm_password}
                 onChange={handleChanges}
                 className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -303,7 +303,7 @@ export default function Register() {
                 autoComplete="new-password"
               />
               <button
-                type="button" // Important: type="button" to prevent form submission
+                type="button" 
                 onClick={toggleConfirmPasswordVisibility}
                 className="absolute inset-y-0 right-0 top-7 pr-3 flex items-center text-gray-400 hover:text-gray-200 focus:outline-none"
                 aria-label={

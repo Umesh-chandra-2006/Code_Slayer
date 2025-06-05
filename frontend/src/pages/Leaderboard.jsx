@@ -1,7 +1,5 @@
-// src/pages/Leaderboard.jsx (or src/components/Leaderboard.jsx)
-
 import React from 'react';
-import { motion } from 'framer-motion'; // Keep for consistency
+import { motion } from 'framer-motion'; 
 
 const Leaderboard = () => {
   const containerVariants = {
@@ -11,7 +9,7 @@ const Leaderboard = () => {
 
   return (
     <motion.div
-      className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center" // Centralize and add padding
+      className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center" 
       initial="hidden"
       animate="visible"
       variants={containerVariants}

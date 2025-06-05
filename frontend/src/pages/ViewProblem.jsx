@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import ReactMarkdown from 'react-markdown'; // Import ReactMarkdown
+import ReactMarkdown from 'react-markdown'; 
 
 import CodeEditor from "./CodeEditor";
 import Card from "../components/UI/Card";
@@ -13,22 +13,22 @@ export default function ViewProblem() {
   const [problem, setProblem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("description"); // State for active tab: 'description', 'editorial', 'submissions', 'comments'
+  const [activeTab, setActiveTab] = useState("description"); 
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loggedInUserId, setLoggedInUserId] = useState(null); // Use state for logged-in user ID
-  const [selectedLanguage, setSelectedLanguage] = useState("cpp"); // New state for language in ViewProblem
+  const [loggedInUserId, setLoggedInUserId] = useState(null); 
+  const [selectedLanguage, setSelectedLanguage] = useState("cpp"); 
   
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 
-  // Effect to determine admin status and loggedInUserId from token
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
         setIsAdmin(decodedToken.role === 'admin');
-        setLoggedInUserId(decodedToken.id); // Set to state
+        setLoggedInUserId(decodedToken.id); 
       } catch (error) {
         console.error("Error decoding token:", error);
         setIsAdmin(false);
@@ -40,12 +40,12 @@ export default function ViewProblem() {
     }
   }, []);
 
-  // Fetch problem details
+
   const fetchProblem = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem("token"); // Get token for authorized request
+      const token = localStorage.getItem("token"); 
       const headers = {
         "Content-Type": "application/json",
       };
@@ -54,15 +54,15 @@ export default function ViewProblem() {
       }
 
       const res = await axios.get(`${API_BASE_URL}/api/problems/${id}`, { headers });
-      setProblem(res.data); // Axios puts the response data directly on .data
+      setProblem(res.data); 
 
-      // Set initial language based on starter code available, default to 'cpp'
+
       if (res.data.starterCode && res.data.starterCode.cpp) {
         setSelectedLanguage("cpp");
       } else if (res.data.starterCode && res.data.starterCode.python) {
         setSelectedLanguage("python");
       } else {
-        setSelectedLanguage("cpp"); // Default if no specific starter code is found
+        setSelectedLanguage("cpp"); 
       }
 
     } catch (err) {
@@ -395,16 +395,16 @@ export default function ViewProblem() {
           <div className="flex-1">
           <CodeEditor
             problemId={id}
-            userId={loggedInUserId} // Pass the logged-in user ID to CodeEditor
-            isControlledByParent={true} // Now controlled by ViewProblem
-            language={selectedLanguage} // Pass the selected language
-            setLanguage={setSelectedLanguage} // Pass the setter for language
-            initialCode={problem.starterCode ? (problem.starterCode[selectedLanguage] || "") : ""} // Pass starter code for current language
+            userId={loggedInUserId} 
+            isControlledByParent={true}
+            language={selectedLanguage}
+            setLanguage={setSelectedLanguage}
+            initialCode={problem.starterCode ? (problem.starterCode[selectedLanguage] || "") : ""} 
             publicTestCases={problem.sampleTestCases.map(tc => ({
               input: tc.input,
               expectedOutput: tc.output,
-              // Note: Other fields like 'actualOutput', 'status', 'time', 'memory' etc.
-              // will be populated by CodeEditor's run/submit logic.
+
+
             }))}
             problemDescription={problem.description}
           />

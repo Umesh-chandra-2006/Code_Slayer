@@ -1,4 +1,4 @@
-// src/pages/ProfilePage.jsx
+
 
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
@@ -16,8 +16,8 @@ const ProfilePage = () => {
         streak: '0 days',
         languageStats: {},
         solvedByDifficulty: { Easy: 0, Medium: 0, Hard: 0 },
-        dailySubmissionCounts: {}, // This will store date strings as keys and counts as values
-        recentSubmissions: [], // Ensure this is initialized
+        dailySubmissionCounts: {}, 
+        recentSubmissions: [], 
     });
 
     const [loading, setLoading] = useState(true);
@@ -55,9 +55,9 @@ const ProfilePage = () => {
                     problemsSolved: data.problemsSolved || 0,
                     streak: data.streak || '0 days',
                     languageStats: data.languageStats || {},
-                    solvedByDifficulty: { ...profileData.solvedByDifficulty, ...data.solvedByDifficulty }, // Merge to ensure all difficulties are present
+                    solvedByDifficulty: { ...profileData.solvedByDifficulty, ...data.solvedByDifficulty }, 
                     dailySubmissionCounts: data.dailySubmissionCounts || {},
-                    recentSubmissions: data.recentSubmissions || [], // Ensure recent submissions are handled
+                    recentSubmissions: data.recentSubmissions || [], 
                 };
 
                 setProfileData(processedData);
@@ -72,7 +72,7 @@ const ProfilePage = () => {
         fetchProfile();
     }, []);
 
-    // Data preparation for Recharts - useMemo for performance
+
     const languageChartData = useMemo(() => {
         return Object.entries(profileData.languageStats).map(([name, value]) => ({
             name,
@@ -85,25 +85,25 @@ const ProfilePage = () => {
             { name: 'Easy', value: profileData.solvedByDifficulty.Easy || 0 },
             { name: 'Medium', value: profileData.solvedByDifficulty.Medium || 0 },
             { name: 'Hard', value: profileData.solvedByDifficulty.Hard || 0 },
-        ].filter(entry => entry.value > 0); // Only show difficulties with solved problems
+        ].filter(entry => entry.value > 0); 
     }, [profileData.solvedByDifficulty]);
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF19A0', '#19FFFF'];
     const DIFFICULTY_COLORS = {
-        'Easy': '#00C49F', // Green
-        'Medium': '#FFBB28', // Yellow
-        'Hard': '#FF0000', // Red
+        'Easy': '#00C49F', 
+        'Medium': '#FFBB28',
+        'Hard': '#FF0000', 
     };
 
-    // --- Heatmap Logic ---
-    // Refined to simplify month label positioning and use CSS Grid for the layout
+
+
 
     const getHeatmapColor = (count) => {
-        if (count === 0) return 'bg-gray-800'; // No submissions
+        if (count === 0) return 'bg-gray-800'; 
         if (count <= 2) return 'bg-green-700 hover:bg-green-600';
         if (count <= 5) return 'bg-green-600 hover:bg-green-500';
         if (count <= 10) return 'bg-green-500 hover:bg-green-400';
-        return 'bg-green-400 hover:bg-green-300'; // More than 10
+        return 'bg-green-400 hover:bg-green-300'; 
     };
 
     const heatmapData = useMemo(() => {
@@ -118,43 +118,43 @@ const ProfilePage = () => {
             days.push(date);
         }
 
-        const grid = Array.from({ length: 7 }, () => []); // 7 rows for Mon-Sun
-        const monthMap = new Map(); // Store month name and its starting column index
+        const grid = Array.from({ length: 7 }, () => []); 
+        const monthMap = new Map(); 
 
-        // Calculate initial padding for the first week to align days correctly
-        const firstDayOfWeekOfRangeStart = days[0].getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-        const initialPaddingDays = (firstDayOfWeekOfRangeStart === 0) ? 6 : firstDayOfWeekOfRangeStart - 1; // Convert Sun->6, Mon->0
 
-        // Pad the beginning of the grid
+        const firstDayOfWeekOfRangeStart = days[0].getDay(); 
+        const initialPaddingDays = (firstDayOfWeekOfRangeStart === 0) ? 6 : firstDayOfWeekOfRangeStart - 1; 
+
+
         for (let i = 0; i < initialPaddingDays; i++) {
             grid[i % 7].push({ date: null, count: 0, isEmpty: true });
         }
 
         days.forEach((date) => {
-            const dayOfWeek = date.getDay(); // 0 (Sun), 1 (Mon), ..., 6 (Sat)
-            const gridRowIndex = (dayOfWeek === 0) ? 6 : dayOfWeek - 1; // Convert to 0 (Mon), ..., 6 (Sun)
+            const dayOfWeek = date.getDay(); 
+            const gridRowIndex = (dayOfWeek === 0) ? 6 : dayOfWeek - 1; 
 
             const dateString = date.toISOString().split('T')[0];
             const count = profileData.dailySubmissionCounts?.[dateString] || 0;
 
             grid[gridRowIndex].push({ date, count, isEmpty: false });
 
-            // Store month label position for the first day of each month
+
             const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
             if (!monthMap.has(monthKey)) {
-                // Calculate the column index for this date
-                // This is the current number of cells in any row + the initial padding, divided by 7 (days in a week)
-                const currentColumn = Math.floor(grid[gridRowIndex].length / 7); // Simplified column index
+
+
+                const currentColumn = Math.floor(grid[gridRowIndex].length / 7); 
                 monthMap.set(monthKey, {
                     month: date.toLocaleString('default', { month: 'short' }),
-                    // This offset will be determined by CSS grid column positioning
-                    // We just need the *index* of the column where the month starts
-                    columnIndex: grid[0].length - 1 // The column where this day ends up
+
+
+                    columnIndex: grid[0].length - 1 
                 });
             }
         });
 
-        // Ensure all rows have the same number of columns by padding the end
+
         const maxColumns = Math.max(...grid.map(row => row.length));
         for (let i = 0; i < 7; i++) {
             while (grid[i].length < maxColumns) {
@@ -162,22 +162,22 @@ const ProfilePage = () => {
             }
         }
         
-        // Convert monthMap to an array, and refine column indices for display
+
         const monthLabels = Array.from(monthMap.values()).map((monthData, idx) => {
-            // Re-calculate effective offset for month labels based on *final* grid structure
-            // Each cell is 12px + 2px gap = 14px. Column starts from the 2nd column (index 1) after day labels.
-            // Adjust `30` if your day labels (Mon, Tue...) have different width.
-            const offset = (monthData.columnIndex * 14) + 30; // Approx. width of day labels + cell width * column index
+
+
+
+            const offset = (monthData.columnIndex * 14) + 30; 
             return { ...monthData, offset };
         });
 
 
         return { grid, monthLabels, numWeeks: maxColumns };
-    }, [profileData.dailySubmissionCounts]); // Re-calculate only when submission counts change
+    }, [profileData.dailySubmissionCounts]); 
 
     const daysOfWeekLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-    // --- End Heatmap Logic ---
+
 
     const containerVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -228,7 +228,7 @@ const ProfilePage = () => {
     return (
         <div className="min-h-screen bg-gray-900 text-gray-100 p-4 sm:p-6 lg:p-8 flex justify-center">
             <motion.div
-                className="w-full max-w-7xl" // Adjusted max-width for better content flow, let heatmap overflow if needed
+                className="w-full max-w-7xl" 
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
@@ -241,9 +241,7 @@ const ProfilePage = () => {
                         </h2>
                     </motion.div>
 
-                    {/* Main content area: Two Columns */}
                     <div className="flex flex-col lg:flex-row gap-8">
-                        {/* Left Section: User Info & Stats (Thinner) */}
                         <div className="lg:w-1/3 flex flex-col gap-6">
                             <motion.div variants={itemVariants}>
                                 <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center"><FaUserCircle className="mr-2" /> General Information</h3>
@@ -334,17 +332,13 @@ const ProfilePage = () => {
                             </motion.div>
                         </div>
 
-                        {/* Right Section: Heatmap & Submissions (Wider) */}
                         <div className="lg:flex-1 flex flex-col gap-6">
-                            {/* Submission Heatmap Card */}
                             <motion.div variants={itemVariants} className="mt-0">
                                 <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center">
                                     <FaCalendarAlt className="mr-2 text-teal-300" /> Daily Submissions (Last 365 Days)
                                 </h3>
                                 <div className="relative p-2 border border-gray-700 rounded-lg bg-gray-700 overflow-x-auto custom-scrollbar-horizontal"> {/* Added overflow-x-auto */}
-                                    {/* Month Labels - Positioned relative to the scrollable container */}
                                     <div className="relative h-5 mb-1 ml-[30px] flex text-xs text-gray-400 pointer-events-none">
-                                        {/* This div will be directly above the grid content and scroll with it */}
                                         {heatmapData.monthLabels.map((month, idx) => (
                                             <span
                                                 key={idx}
@@ -357,27 +351,24 @@ const ProfilePage = () => {
                                     </div>
 
                                     <div className="flex">
-                                        {/* Vertical Day Labels (Mon, Tue, etc.) */}
-                                        <div className="flex flex-col gap-0.5 text-gray-400 text-xs pr-2 flex-shrink-0"> {/* flex-shrink-0 to prevent shrinking */}
+                                        <div className="flex flex-col gap-0.5 text-gray-400 text-xs pr-2 flex-shrink-0"> 
                                             {daysOfWeekLabels.map((day, index) => (
                                                 <div key={index} className="h-3 flex items-center justify-end">{day}</div>
                                             ))}
                                         </div>
 
-                                        {/* Heatmap Grid Cells - Using CSS Grid for better alignment */}
                                         <div
                                             className="grid gap-0.5"
                                             style={{
                                                 gridTemplateColumns: `repeat(${heatmapData.numWeeks}, minmax(0, 1fr))`,
-                                                gridTemplateRows: 'repeat(7, minmax(0, 1fr))', // 7 rows for days of week
-                                                // Ensure explicit width based on number of columns to enable consistent horizontal scroll
-                                                width: `${heatmapData.numWeeks * 14}px` // 14px = w-3 (12px) + gap-0.5 (2px)
+                                                gridTemplateRows: 'repeat(7, minmax(0, 1fr))', 
+
+                                                width: `${heatmapData.numWeeks * 14}px` 
                                             }}
                                         >
-                                            {/* Flat map all cells for a single grid container */}
                                             {heatmapData.grid.flat().map((dayData, index) => (
                                                 <div
-                                                    key={index} // Index is safe here because we flatten the grid
+                                                    key={index} 
                                                     title={dayData && !dayData.isEmpty ? `${dayData.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}: ${dayData.count} submissions` : 'No submissions'}
                                                     className={`w-3 h-3 border border-gray-700 rounded-sm transition-colors duration-150 ${dayData.isEmpty ? 'bg-gray-900 cursor-not-allowed' : getHeatmapColor(dayData.count)}`}
                                                 ></div>

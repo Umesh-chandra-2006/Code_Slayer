@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // Import Link for navigation
-import { motion } from "framer-motion"; // For animations
+import { Link } from "react-router-dom"; 
+import { motion } from "framer-motion"; 
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState(""); // Renamed for consistency
-  const [message, setMessage] = useState(""); // Renamed for consistency
-  const [error, setError] = useState(""); // Renamed for consistency
-  const [isLoading, setIsLoading] = useState(false); // Renamed for consistency
+  const [email, setEmail] = useState(""); 
+  const [message, setMessage] = useState(""); 
+  const [error, setError] = useState(""); 
+  const [isLoading, setIsLoading] = useState(false); 
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -15,7 +15,7 @@ export default function ForgotPassword() {
     e.preventDefault();
     setMessage("");
     setError("");
-    setIsLoading(true); // Start loading
+    setIsLoading(true); 
 
     try {
       const res = await fetch(
@@ -34,7 +34,7 @@ export default function ForgotPassword() {
           data.message ||
             "Password reset link sent to your email. Please check your inbox."
         );
-        setEmail(""); // Clear email after successful submission
+        setEmail(""); 
       } else {
         setError(data.message || "Failed to send reset email. Please try again.");
       }
@@ -42,11 +42,11 @@ export default function ForgotPassword() {
       console.error("Error during forgot password request:", err);
       setError("Server error. Please try again later.");
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false); 
     }
   };
 
-  // Animation variants for framer-motion
+
   const formVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },

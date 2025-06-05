@@ -4,13 +4,13 @@ import { motion } from "framer-motion";
 export default function LandingPage() {
   const navigate = useNavigate();
 
-  // Animation variants for staggered effects
+
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1, // Small delay between children animations
+        staggerChildren: 0.1, 
       },
     },
   };
@@ -21,7 +21,7 @@ export default function LandingPage() {
   };
 
   return (
-    // Updated background gradient for a softer, more modern feel
+
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-indigo-950 text-gray-100">
       {/* Navigation */}
       <nav className="px-6 py-5 flex justify-between items-center relative z-10 container mx-auto">
@@ -144,7 +144,7 @@ export default function LandingPage() {
               <div className="text-green-300 font-semibold">Uptime</div>
             </motion.div>
             <motion.div
-              className="bg-gray-800/60 p-8 rounded-2xl shadow-xl border border-gray-700 hover:shadow-2xl transition-all duration-300 md:col-span-1" // Adjusted for better layout on md screens
+              className="bg-gray-800/60 p-8 rounded-2xl shadow-xl border border-gray-700 hover:shadow-2xl transition-all duration-300 md:col-span-1"  
               variants={itemVariants}
             >
               <div className="text-4xl md:text-5xl font-extrabold mb-3 text-white">
@@ -183,7 +183,6 @@ export default function LandingPage() {
             whileInView="show"
             viewport={{ once: true, amount: 0.2 }}
           >
-            {/* Feature 1 */}
             <motion.div
               variants={itemVariants}
               className="bg-gray-800/60 p-10 rounded-3xl shadow-xl border border-gray-700 relative overflow-hidden group hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300"

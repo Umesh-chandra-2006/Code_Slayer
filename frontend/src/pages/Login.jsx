@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom"; // Import Link for navigation
-import { motion } from "framer-motion"; // For animations
+import { useNavigate, Link } from "react-router-dom"; 
+import { motion } from "framer-motion"; 
 import { FaEye, FaEyeSlash } from "react-icons/fa"; 
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // New loading state
+  const [isLoading, setIsLoading] = useState(false); 
    const [showPassword, setShowPassword] = useState(false); 
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -26,7 +26,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
     e.preventDefault();
     setMessage("");
     setError("");
-    setIsLoading(true); // Start loading
+    setIsLoading(true); 
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
@@ -45,9 +45,9 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
         const isAdmin = data.user?.role === "admin";
         
         setTimeout(() => {
-          navigate("/dashboard"); // Redirect to dashboard
-          setFormData({ email: "", password: "" }); // Clear form
-        }, 1500); // Give user a moment to see success message
+          navigate("/dashboard"); 
+          setFormData({ email: "", password: "" });
+        }, 1500); 
       } else {
         setError(data.message || "Login failed. Please check your credentials.");
       }
@@ -55,11 +55,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
       console.error("Error during login:", err);
       setError("Server error. Please try again later.");
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false); 
     }
   };
 
-  // Animation variants for framer-motion
+
   const formVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
@@ -140,7 +140,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
               autoComplete="current-password"
             />
             <button
-              type="button" // Important: type="button" to prevent form submission
+              type="button" 
               onClick={togglePasswordVisibility}
               className="absolute inset-y-0 right-0 top-7 pr-3 flex items-center text-gray-400 hover:text-gray-200 focus:outline-none"
               aria-label={showPassword ? "Hide password" : "Show password"}

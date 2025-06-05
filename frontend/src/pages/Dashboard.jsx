@@ -1,15 +1,14 @@
-// src/pages/Dashboard.jsx
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import { useNavigate } from 'react-router-dom'; 
 import Card from '../components/UI/Card';
 import Button from '../components/UI/Button';
 import Badge from '../components/UI/Badge';
-import { FaCheckCircle, FaAward, FaChartLine, FaBolt, FaClock, FaFire } from 'react-icons/fa'; // FaCode removed
+import { FaCheckCircle, FaAward, FaChartLine, FaBolt, FaClock, FaFire } from 'react-icons/fa';
 
 const Dashboard = () => {
-  const navigate = useNavigate(); // Initialize navigate hook
+  const navigate = useNavigate(); 
 
-  // State to hold dynamic dashboard data
   const [dashboardData, setDashboardData] = useState({
     userName: 'Loading...',
     problemsSolved: 0,
@@ -21,8 +20,8 @@ const Dashboard = () => {
     streak: '0 days',
     recentSubmissions: [],
     upcomingContests: [],
-    // languageStats: {}, // Removed
-    solvedByDifficulty: { Easy: 0, Medium: 0, Hard: 0 }, // Initialize new field
+
+    solvedByDifficulty: { Easy: 0, Medium: 0, Hard: 0 }, 
     loading: true,
     error: null,
   });
@@ -31,7 +30,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      setDashboardData((prev) => ({ ...prev, loading: true, error: null })); // Set loading state
+      setDashboardData((prev) => ({ ...prev, loading: true, error: null })); 
 
       try {
         const token = localStorage.getItem("token");
@@ -68,20 +67,20 @@ const Dashboard = () => {
     fetchDashboardData();
   }, []);
 
-  // Helper to determine badge variant for recent submissions (using existing Badge component logic)
+
   const getStatusBadgeVariant = (status) => {
     switch (status && status.toLowerCase()) {
       case 'accepted':
-        return 'accepted'; // Maps to green
+        return 'accepted'; 
       case 'wrong answer':
       case 'time limit exceeded':
       case 'runtime error':
       case 'compilation error':
       case 'error':
-        return 'wrong-answer'; // Maps to red
+        return 'wrong-answer'; 
       case 'pending':
       default:
-        return 'default'; // Maps to gray
+        return 'default';
     }
   };
 
@@ -226,7 +225,7 @@ const Dashboard = () => {
           <Button
             variant="primary"
             className="mt-6 w-full bg-purple-600 hover:bg-purple-700"
-            onClick={() => alert('Simulating contest registration!')} // Placeholder for registration
+            onClick={() => alert('Simulating contest registration!')} 
           >
             Find Contests
           </Button>

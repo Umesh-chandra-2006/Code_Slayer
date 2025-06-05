@@ -30,10 +30,9 @@ export default function CodeEditor({
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 
-    const editorRef = useRef(null); // ADD THIS LINE for Monaco Editor
+    const editorRef = useRef(null); 
 
-    // State to store the initial boilerplate code for reset functionality
-    const [initialProblemBoilerplateCode, setInitialProblemBoilerplateCode] = useState(initialCode); // ADD THIS LINE
+    const [initialProblemBoilerplateCode, setInitialProblemBoilerplateCode] = useState(initialCode); 
 
     const [internalLanguage, setInternalLanguage] = useState(initialLanguage);
     const currentLanguage = isControlledByParent ? parentLanguage : internalLanguage;
@@ -42,13 +41,9 @@ export default function CodeEditor({
     const [submissionMessage, setSubmissionMessage] = useState("");
     const [currentTab, setCurrentTab] = useState("output");
     const [submissionVerdict, setSubmissionVerdict] = useState("");
-    const [overallRunTime, setOverallRunTime] = useState(null); // For overall runtime
-    const [overallMemory, setOverallMemory] = useState(null);    // For overall memory
-
-    // State to distinguish between a 'run' verdict and a 'submit' verdict
+    const [overallRunTime, setOverallRunTime] = useState(null); 
+    const [overallMemory, setOverallMemory] = useState(null);    
     const [isRunVerdict, setIsRunVerdict] = useState(false);
-
-// ADDED: New states for AI review
     const [aiReviewContent, setAiReviewContent] = useState("");
     const [loadingAiReview, setLoadingAiReview] = useState(false);
 
@@ -56,15 +51,13 @@ export default function CodeEditor({
     useEffect(() => {
         setCode(initialCode);
         setInput(initialInput);
-        setInitialProblemBoilerplateCode(initialCode); // Set boilerplate on initialCode change
+        setInitialProblemBoilerplateCode(initialCode);
         if (!isControlledByParent) {
             setInternalLanguage(initialLanguage);
         }
     }, [initialCode, initialInput, initialLanguage, isControlledByParent]);
 
     useEffect(() => {
-        // Only switch to test_results tab if problemId exists and publicTestCases are available
-        // and no results are currently displayed, suggesting an initial load for a problem page.
         if (problemId && publicTestCases.length > 0 && testResults.length === 0) {
             setCurrentTab("test_results");
         }
@@ -84,49 +77,47 @@ export default function CodeEditor({
     };
     const token = localStorage.getItem("token");
 
-    // Monaco Editor specific handlers
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
-        // Define a custom theme for Monaco
         monaco.editor.defineTheme('dark-plus', {
             base: 'vs-dark',
             inherit: true,
             rules: [],
             colors: {
-                'editor.background': '#111827', // Tailwind gray-800
+                'editor.background': '#111827',
             }
         });
-        monaco.editor.setTheme('dark-plus'); // Apply the custom theme
+        monaco.editor.setTheme('dark-plus'); 
     };
 
     const handleCodeChange = (value, event) => {
         setCode(value);
     };
 
-    // New language change handler for select element
+
     const handleLanguageChange = (e) => {
         const newLanguage = e.target.value;
         currentSetLanguage(newLanguage);
         clearResults();
-        // Optionally, you can set default code templates here based on newLanguage
-        // if (newLanguage === "cpp") {
-        //     setCode("#include <iostream>\n\nint main() {\n    std::cout << \"Hello, C++!\" << std::endl;\n    return 0;\n}");
-        // } else if (newLanguage === "python") {
-        //     setCode("print(\"Hello, Python!\")");
-        // }
+
+
+
+
+
+
     };
 
-    // Function to reset code to boilerplate
+
     const handleResetCode = () => {
         setCode(initialProblemBoilerplateCode);
-        clearResults(); // Optionally clear results on reset
+        clearResults(); 
     };
 
     const handleRunOrTestCode = useCallback(async (e) => {
         e.preventDefault();
         clearResults();
         setLoadingRun(true);
-        setIsRunVerdict(true); // Flag this as a 'run' operation result
+        setIsRunVerdict(true); 
 
         const isProblemTestRun = problemId && !input.trim();
         setCurrentTab(isProblemTestRun ? "test_results" : "output");
@@ -141,7 +132,7 @@ export default function CodeEditor({
             let data;
 
             if (isProblemTestRun) {
-                // This is a "Test All Sample Cases" scenario
+
                 response = await axios.post(`${API_BASE_URL}/api/compiler/test`, {
                     language: currentLanguage,
                     code,
@@ -151,17 +142,17 @@ export default function CodeEditor({
 
                 setTestResults(data.testResults.map(tc => ({
                     ...tc,
-                    isPublicRun: true // Flag to indicate this is from a 'run' operation (for display of input/output)
+                    isPublicRun: true
                 })) || []);
                 setOutput("");
                 setCompilationError(data.compilationError || "");
                 setRuntimeError(data.runtimeError || "");
-                setOverallRunTime(data.overallRuntime || null); // Capture overall runtime
-                setOverallMemory(data.overallMemory || null); // Capture overall memory
-                // Do NOT set submissionVerdict here for run code
-                setSubmissionVerdict(""); // Ensure no verdict is displayed for run
+                setOverallRunTime(data.overallRuntime || null); 
+                setOverallMemory(data.overallMemory || null); 
+
+                setSubmissionVerdict("");
             } else {
-                // This is a "Run with Custom Input" or standalone run scenario
+
                 response = await axios.post(`${API_BASE_URL}/api/compiler/run`, {
                     language: currentLanguage,
                     code,
@@ -173,17 +164,17 @@ export default function CodeEditor({
                 setCompilationError(data.compilationError || "");
                 setRuntimeError(data.runtimeError || "");
                 setTestResults([]);
-                setOverallRunTime(data.time || null); // For single run, this is the only relevant time
-                setOverallMemory(data.memory || null); // For single run, this is the only relevant memory
-                // Do NOT set submissionVerdict here for custom run
-                setSubmissionVerdict(""); // Ensure no verdict is displayed for run
+                setOverallRunTime(data.time || null); 
+                setOverallMemory(data.memory || null); 
+
+                setSubmissionVerdict(""); 
             }
         } catch (err) {
             console.error("Error running/testing code:", err);
             const errorData = err.response?.data || {};
             setRuntimeError(errorData.runtimeError || errorData.error || "Server error during code execution or testing.");
             setCompilationError(errorData.compilationError || "");
-            setSubmissionVerdict("Error"); // Can set 'Error' verdict if a severe error prevents any run/test
+            setSubmissionVerdict("Error"); 
             setTestResults([]);
             setOverallRunTime(null);
             setOverallMemory(null);
@@ -198,7 +189,7 @@ export default function CodeEditor({
         setSubmissionMessage("Submitting your solution...");
         setSubmissionVerdict("Pending");
         setCurrentTab("test_results");
-        setIsRunVerdict(false); // Flag this as a 'submit' operation result
+        setIsRunVerdict(false); 
 
         if (!problemId || !userId) {
             setSubmissionMessage("Error: Problem ID or User ID is missing for submission.");
@@ -229,10 +220,10 @@ export default function CodeEditor({
 
             setTestResults(data.testResults.map(tc => ({
                 ...tc,
-                isSubmissionResult: true // Flag to indicate this is from a 'submit' operation
+                isSubmissionResult: true 
             })) || []);
-            setOverallRunTime(data.overallRuntime || null); // Use overall runtime from submission
-            setOverallMemory(data.overallMemory || null);    // Use overall memory from submission
+            setOverallRunTime(data.overallRuntime || null);
+            setOverallMemory(data.overallMemory || null);    
 
         } catch (err) {
             console.error("Error submitting solution:", err);
@@ -251,7 +242,7 @@ export default function CodeEditor({
     const handleAiReview = useCallback(async () => {
      setLoadingAiReview(true);
      setAiReviewContent("Generating AI review...");
-     setCurrentTab("aiReview"); // Switch to AI Review tab when button is clicked
+     setCurrentTab("aiReview");
 
      const token = localStorage.getItem("token");
      if (!token) {
@@ -264,17 +255,17 @@ export default function CodeEditor({
          const payload = {
              code: code,
              language: currentLanguage,
-             problemDescription: problemDescription, // Pass the problem description
-             submissionVerdict: submissionVerdict, // Pass the last submission verdict
-             compilationError: compilationError, // Pass compilation error if any
-             runtimeError: runtimeError, // Pass runtime error if any
+             problemDescription: problemDescription, 
+             submissionVerdict: submissionVerdict,  
+             compilationError: compilationError,
+             runtimeError: runtimeError, 
              failedTestInput: submissionVerdict === "Wrong Answer" && testResults.length > 0
-                 ? testResults.find(tr => tr.status === 'Wrong Answer')?.input // Get the input of the first WA test case
+                 ? testResults.find(tr => tr.status === 'Wrong Answer')?.input 
                  : undefined,
          };
 
          const response = await axios.post(
-             `${API_BASE_URL}/api/ai/review`, // Your new AI backend endpoint
+             `${API_BASE_URL}/api/ai/review`, 
              payload,
              {
                  headers: {
@@ -293,8 +284,7 @@ export default function CodeEditor({
      } finally {
          setLoadingAiReview(false);
      }
- }, [code, currentLanguage, problemDescription, submissionVerdict, compilationError, runtimeError, testResults]); // Add all dependencies
-
+ }, [code, currentLanguage, problemDescription, submissionVerdict, compilationError, runtimeError, testResults]); 
 
     const statusVariant = useCallback((status) => {
         switch (status) {
@@ -316,7 +306,7 @@ export default function CodeEditor({
                 return "bg-gray-500/20 text-gray-400 border-gray-600";
             case "Pending":
                 return "bg-blue-500/20 text-blue-400 border-blue-600";
-            case "Completed": // For single runs that finish without error
+            case "Completed": 
                 return "bg-gray-500/20 text-gray-400 border-gray-600";
             default:
                 return "bg-gray-500/20 text-gray-400 border-gray-600";
@@ -329,12 +319,12 @@ export default function CodeEditor({
         exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
     };
 
-    // Mapping for Monaco languages
+
     const monacoLanguageMap = {
         cpp: "cpp",
         python: "python",
-        java: "java", // Example for Java if you add it later
-        // Add more mappings as needed
+        java: "java", 
+
     };
 
     return (
@@ -356,14 +346,13 @@ export default function CodeEditor({
                 </div>
             )}
 
-            {/* Adjusted height and added flex-grow for the Monaco Editor container */}
-            <div className="flex-1 p-4  flex flex-col"> {/* CHANGED: Added min-h-[400px] and flex flex-col */}
+            <div className="flex-1 p-4  flex flex-col"> 
                 <label htmlFor="code-editor" className="block bg-gray-900 text-gray-300 text-sm font-semibold mb-2">
                     Code:
                 </label>
-                <div className="flex-grow relative"> {/* ADDED: A flex-grow div to ensure Editor takes available space */}
+                <div className="flex-grow relative"> 
                     <Editor
-                        height="500px" // Editor takes full height of its parent (flex-grow div)
+                        height="500px" 
                         language={monacoLanguageMap[currentLanguage] || "plaintext"}
                         value={code}
                         theme="dark-plus"
@@ -373,9 +362,9 @@ export default function CodeEditor({
                             minimap: { enabled: false },
                             fontSize: 14,
                             scrollBeyondLastLine: false,
-                            automaticLayout: true, // Important for responsive resizing
+                            automaticLayout: true, 
                             wordWrap: "on",
-                            // You can add more options here
+
                         }}
                     />
                 </div>
@@ -397,8 +386,7 @@ export default function CodeEditor({
             )}
 
             <div className="p-4 border-t border-gray-700 flex flex-wrap gap-4 justify-end">
-                {/* Reset to Boilerplate Code Button ADDED */}
-                {problemId && ( // Only show if it's a problem-solving context
+                {problemId && ( 
                     <Button
                         onClick={handleResetCode}
                         variant="secondary"
@@ -489,7 +477,7 @@ export default function CodeEditor({
                     <button
                         className={`px-4 py-2 text-sm font-medium ${currentTab === "aiReview" ? "border-b-2 border-blue-500 text-blue-400" : "text-gray-400 hover:text-gray-300"}`}
                         onClick={() => setCurrentTab("aiReview")}
-                        disabled={!aiReviewContent && !loadingAiReview} // Disable if no content or not loading
+                        disabled={!aiReviewContent && !loadingAiReview}
                     >
                         AI Review
                     </button>
@@ -666,7 +654,8 @@ export default function CodeEditor({
                             animate="visible"
                             exit="exit"
                             className="mt-4 p-4 bg-gray-700/50 rounded-lg border border-gray-600 custom-scrollbar overflow-y-auto"
-                            style={{ maxHeight: '400px' }} // Adjust height as needed
+                            style={{ maxHeight: '400px' }} 
+
                         >
                             <h4 className="font-semibold mb-2 text-gray-200">AI Review:</h4>
                             {loadingAiReview ? (

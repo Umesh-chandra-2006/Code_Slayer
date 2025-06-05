@@ -2,13 +2,13 @@ import React, { useEffect, useState, useMemo, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion";
 import Card from "../components/UI/Card";
 import Badge from "../components/UI/Badge";
-import Button from "../components/UI/Button"; // Assuming Button component is used for dropdowns
-import { useNavigate, Link } from "react-router-dom"; // For clickable rows and problem links
+import Button from "../components/UI/Button"; 
+import { useNavigate, Link } from "react-router-dom"; 
 
-// Lucide React Icons (assuming you have these installed)
+
 import { Search, SlidersHorizontal, Languages, History, SortAsc, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 
-// Custom hook for debouncing values (from ProblemList.jsx)
+
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -32,23 +32,23 @@ const SubmissionHistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const userId = localStorage.getItem("userId");
-  const navigate = useNavigate(); // Initialize navigate hook
+  const navigate = useNavigate(); 
 
-  // --- State for Filters and Sorting ---
+
   const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearchTerm = useDebounce(searchTerm, 500); // Debounce search term
+  const debouncedSearchTerm = useDebounce(searchTerm, 500); 
   const [selectedLanguage, setSelectedLanguage] = useState("All");
   const [selectedVerdict, setSelectedVerdict] = useState("All");
-  const [sortBy, setSortBy] = useState("submittedAt"); // Default sort by submittedAt
-  const [sortOrder, setSortOrder] = useState("desc"); // Default descending (newest first)
-  // ------------------------------------
+  const [sortBy, setSortBy] = useState("submittedAt"); 
+  const [sortOrder, setSortOrder] = useState("desc"); 
 
-  // States for custom dropdown/popover visibility
+
+
   const [showLanguageFilter, setShowLanguageFilter] = useState(false);
   const [showVerdictFilter, setShowVerdictFilter] = useState(false);
   const [showSortOptions, setShowSortOptions] = useState(false);
 
-  // Refs for dropdowns to handle clicks outside
+
   const languageFilterRef = useRef(null);
   const verdictFilterRef = useRef(null);
   const sortOptionsRef = useRef(null);
@@ -86,7 +86,7 @@ const SubmissionHistory = () => {
     fetchSubmissions();
   }, [fetchSubmissions]);
 
-  // Effect for closing dropdowns when clicking outside
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (languageFilterRef.current && !languageFilterRef.current.contains(event.target)) {
@@ -106,11 +106,11 @@ const SubmissionHistory = () => {
     };
   }, []);
 
-  // --- Filtering and Sorting Logic ---
+
   const filteredAndSortedSubmissions = useMemo(() => {
     let tempSubmissions = [...submissions];
 
-    // 1. Search Term Filter (using debounced value)
+
     if (debouncedSearchTerm) {
       tempSubmissions = tempSubmissions.filter(sub =>
         sub.problem?.title?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
@@ -118,17 +118,17 @@ const SubmissionHistory = () => {
       );
     }
 
-    // 2. Language Filter
+
     if (selectedLanguage !== "All") {
       tempSubmissions = tempSubmissions.filter(sub => sub.language === selectedLanguage);
     }
 
-    // 3. Verdict Filter
+
     if (selectedVerdict !== "All") {
       tempSubmissions = tempSubmissions.filter(sub => sub.verdict === selectedVerdict);
     }
 
-    // 4. Sorting
+
     tempSubmissions.sort((a, b) => {
       let compareValue = 0;
       if (sortBy === "submittedAt") {
@@ -140,9 +140,9 @@ const SubmissionHistory = () => {
       } else if (sortBy === "verdict") {
         compareValue = (a.verdict || "").localeCompare(b.verdict || "");
       } else if (sortBy === "runtime") {
-        compareValue = (a.runtime || 0) - (b.runtime || 0); // Handle null/undefined runtime
+        compareValue = (a.runtime || 0) - (b.runtime || 0); 
       } else if (sortBy === "memory") {
-        compareValue = (a.memory || 0) - (b.memory || 0); // Handle null/undefined memory
+        compareValue = (a.memory || 0) - (b.memory || 0); 
       }
 
       return sortOrder === "asc" ? compareValue : -compareValue;
@@ -150,7 +150,7 @@ const SubmissionHistory = () => {
 
     return tempSubmissions;
   }, [submissions, debouncedSearchTerm, selectedLanguage, selectedVerdict, sortBy, sortOrder]);
-  // ------------------------------------
+
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -170,38 +170,38 @@ const SubmissionHistory = () => {
   const getStatusBadgeVariant = (verdict) => {
     switch (verdict) {
       case "Accepted":
-        return "success"; // Green
+        return "success"; 
       case "Wrong Answer":
-        return "danger"; // Red
+        return "danger"; 
       case "Time Limit Exceeded":
-        return "warning"; // Yellow/Orange
+        return "warning";
       case "Runtime Error":
-        return "info"; // Blue/Cyan
+        return "info"; 
       case "Compilation Error":
-        return "danger"; // Red
+        return "danger";
       case "Pending":
-        return "default"; // Gray/Default
+        return "default";
       case "Error":
-        return "dark"; // Darker gray/Black
+        return "dark"; 
       default:
         return "default";
     }
   };
 
   const handleSortChange = (newSortBy) => {
-    // If clicking the same sort option, toggle order
+
     if (sortBy === newSortBy) {
       setSortOrder(prevOrder => (prevOrder === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortBy(newSortBy);
-      setSortOrder('asc'); // Default to ascending when changing sort field
+      setSortOrder('asc'); 
     }
-    setCurrentPage(1); // Reset to first page on sort change
-    setShowSortOptions(false); // Close dropdown
+    setCurrentPage(1); 
+    setShowSortOptions(false); 
   };
 
 
-  // Extract unique languages and verdicts for filter options
+
   const uniqueLanguages = useMemo(() => {
     const langs = new Set(submissions.map(sub => sub.language));
     return ["All", ...Array.from(langs).sort()];
@@ -277,7 +277,7 @@ const SubmissionHistory = () => {
                       checked={selectedLanguage === lang}
                       onChange={() => {
                         setSelectedLanguage(lang);
-                        setShowLanguageFilter(false); // Close dropdown on selection
+                        setShowLanguageFilter(false); 
                       }}
                       className="form-radio h-4 w-4 text-blue-500 rounded border-gray-600 focus:ring-blue-500 bg-neutral-700"
                     />
@@ -309,9 +309,9 @@ const SubmissionHistory = () => {
                       checked={selectedVerdict === verdict}
                       onChange={() => {
                         setSelectedVerdict(verdict);
-                        setShowVerdictFilter(false); // Close dropdown on selection
+                        setShowVerdictFilter(false); 
                       }}
-                      className="form-radio h-4 w-4 text-green-500" // Example color for radio
+                      className="form-radio h-4 w-4 text-green-500" 
                     />
                     <span className="ml-2">{verdict}</span>
                   </label>
@@ -423,7 +423,7 @@ const SubmissionHistory = () => {
                     name="sortOrder"
                     value="asc"
                     checked={sortOrder === "asc"}
-                    onChange={() => setSortOrder("asc")} // Directly set order
+                    onChange={() => setSortOrder("asc")} 
                     className="form-radio h-4 w-4 text-blue-500"
                   />
                   <span className="ml-2">Ascending</span>
@@ -434,7 +434,7 @@ const SubmissionHistory = () => {
                     name="sortOrder"
                     value="desc"
                     checked={sortOrder === "desc"}
-                    onChange={() => setSortOrder("desc")} // Directly set order
+                    onChange={() => setSortOrder("desc")} 
                     className="form-radio h-4 w-4 text-blue-500"
                   />
                   <span className="ml-2">Descending</span>
@@ -578,9 +578,9 @@ const SubmissionHistory = () => {
                 <motion.tr
                   key={sub._id}
                   variants={itemVariants}
-                  whileHover={{ backgroundColor: "rgba(55, 65, 81, 0.5)" }} // gray-700 with opacity
-                  className="bg-neutral-900 transition-colors duration-200 cursor-pointer" // Start with bg-neutral-900 like ProblemList's tbody rows
-                  onClick={() => navigate(`/submissions/${sub._id}`)} // Navigate to detailed view
+                  whileHover={{ backgroundColor: "rgba(55, 65, 81, 0.5)" }} 
+                  className="bg-neutral-900 transition-colors duration-200 cursor-pointer" 
+                  onClick={() => navigate(`/submissions/${sub._id}`)} 
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200">
                     {index + 1}
@@ -602,8 +602,8 @@ const SubmissionHistory = () => {
                           getStatusBadgeVariant(sub.verdict) === 'danger' ? 'bg-red-500' :
                           getStatusBadgeVariant(sub.verdict) === 'warning' ? 'bg-yellow-500' :
                           getStatusBadgeVariant(sub.verdict) === 'info' ? 'bg-blue-500' :
-                          'bg-gray-500' // default or dark
-                      } text-white px-2 py-1 rounded-full text-xs`} // Apply ProblemList badge styling
+                          'bg-gray-500'
+                      } text-white px-2 py-1 rounded-full text-xs`} 
                     >
                       {sub.verdict}
                     </Badge>

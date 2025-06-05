@@ -7,33 +7,33 @@ import Badge from "../components/UI/Badge";
 import axios from "axios";
 
 export default function ProblemEdit() {
-  const { id } = useParams(); // Get problem ID from URL
+  const { id } = useParams(); 
   const navigate = useNavigate();
   const [form, setForm] = useState({
     title: "",
     description: "",
     inputFormat: "",
     outputFormat: "",
-      // NEW: Replace sampleInput/sampleOutput with sampleTestCases array
+
     sampleTestCases: [{ input: "", output: "", explanation: "" }],
     constraints: "",
     difficulty: "Easy",
     testCases: [{ input: "", output: "", isPublic: false }],
     tags: [],
-    // NEW: Problem properties
-    timeLimit: 1000, // Default in milliseconds for UI
-    memoryLimit: 256, // Default in MB
+
+    timeLimit: 1000, 
+    memoryLimit: 256, 
     editorial: "",
-    hints: [""], // Array of strings, initially one empty hint
-    starterCode: { cpp: "" }, // Object for starter code by language
-    isPublished: false, // For controlling problem visibility
+    hints: [""],
+    starterCode: { cpp: "" }, 
+    isPublished: false, 
   });
 
-  const [loadingProblem, setLoadingProblem] = useState(true); // Loading state for fetching problem data
-  const [isSubmitting, setIsSubmitting] = useState(false); // Loading state for form submission
+  const [loadingProblem, setLoadingProblem] = useState(true); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
-  const [errors, setErrors] = useState({}); // To hold field-specific validation errors
-  const [generalError, setGeneralError] = useState(""); // For non-validation errors or backend errors
+  const [errors, setErrors] = useState({}); 
+  const [generalError, setGeneralError] = useState("");
   const token = localStorage.getItem("token");
 
   const [availableTags, setAvailableTags] = useState([]);
@@ -44,7 +44,7 @@ export default function ProblemEdit() {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 
-  // --- Fetch Available Tags ---
+
   const fetchAvailableTags = useCallback(async () => {
     try {
       setTagsLoading(true);
@@ -64,7 +64,7 @@ export default function ProblemEdit() {
     fetchAvailableTags();
   }, [fetchAvailableTags]);
 
-  // --- Fetch Problem Data ---
+
   useEffect(() => {
     const fetchProblem = async () => {
       if (!id) {
@@ -87,31 +87,31 @@ export default function ProblemEdit() {
         });
         const problemData = response.data;
 
-        // Map fetched data to form state, handling new fields and defaults
+
         setForm({
           title: problemData.title || "",
           description: problemData.description || "",
           inputFormat: problemData.inputFormat || "",
           outputFormat: problemData.outputFormat || "",
-          // NEW: Ensure sampleTestCases is an array of objects
+
           sampleTestCases: problemData.sampleTestCases && problemData.sampleTestCases.length > 0
             ? problemData.sampleTestCases
-            : [{ input: "", output: "", explanation: "" }], // Default if empty or null
+            : [{ input: "", output: "", explanation: "" }], 
 
           constraints: problemData.constraints || "",
           difficulty: problemData.difficulty || "Easy",
           testCases: problemData.testCases || [{ input: "", output: "", isPublic: false }],
           tags: problemData.tags || [],
-          // NEW: Time and Memory limits (backend sends/expects milliseconds)
+
           timeLimit: problemData.timeLimit || 1000,
           memoryLimit: problemData.memoryLimit || 256,
-          // NEW: Editorial, Hints, Starter Code
+
           editorial: problemData.editorial || "",
           hints: problemData.hints && problemData.hints.length > 0 ? problemData.hints : [""],
           starterCode: problemData.starterCode || { cpp: "" },
           isPublished: problemData.isPublished || false,
         });
-        setGeneralError(""); // Clear any previous general errors
+        setGeneralError(""); 
       } catch (err) {
         console.error("Error fetching problem:", err.response?.data || err);
         setGeneralError(err.response?.data?.message || err.message || "Failed to load problem data.");
@@ -121,9 +121,9 @@ export default function ProblemEdit() {
     };
 
     fetchProblem();
-  }, [id, token]); // Re-fetch if ID or token changes
+  }, [id, token]); 
 
-  // --- General Change Handler ---
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     let newValue = value;
@@ -138,7 +138,7 @@ export default function ProblemEdit() {
       ...prev,
       [name]: newValue,
     }));
-    // Clear error for the field being changed
+
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -148,12 +148,12 @@ export default function ProblemEdit() {
     }
   };
 
-  // --- Test Cases Handlers (Hidden) ---
+
   const handleTestCaseChange = (idx, field, value) => {
     const newTestCases = [...form.testCases];
     newTestCases[idx][field] = value;
     setForm((prev) => ({ ...prev, testCases: newTestCases }));
-    // Clear error if user starts typing (though we don't validate empty hidden test cases now)
+
     if (errors.testCases) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -191,7 +191,7 @@ export default function ProblemEdit() {
     }
   };
 
-  // --- NEW: Sample Test Cases Handlers ---
+
   const handleSampleTestCaseChange = (idx, field, value) => {
     const newSampleTestCases = [...form.sampleTestCases];
     newSampleTestCases[idx][field] = value;
@@ -233,7 +233,7 @@ export default function ProblemEdit() {
     }
   };
 
-  // --- NEW: Hints Handlers ---
+
   const handleHintChange = (idx, value) => {
     const newHints = [...form.hints];
     newHints[idx] = value;
@@ -275,7 +275,7 @@ export default function ProblemEdit() {
     }
   };
 
-  // --- NEW: Starter Code Handler ---
+
   const handleStarterCodeChange = (language, value) => {
     setForm((prev) => ({
       ...prev,
@@ -294,16 +294,16 @@ export default function ProblemEdit() {
   };
 
 
-  // --- Tag Management Handlers ---
+
   const handleTagToggle = (tag) => {
     setForm((prev) => {
       const currentTags = prev.tags;
       if (currentTags.includes(tag)) {
-        // If tag is already selected, remove it
+
         return { ...prev, tags: currentTags.filter((t) => t !== tag) };
       } else {
-        // If tag is not selected, add it
-        // Bug Fix: Clear tags error if a tag is added/removed
+
+
         if (errors.tags) {
             setErrors(prevErrors => {
                 const newErrors = { ...prevErrors };
@@ -320,11 +320,11 @@ export default function ProblemEdit() {
     const trimmedTag = newTagInput.trim();
     if (trimmedTag) {
       if (!availableTags.includes(trimmedTag)) {
-        setAvailableTags((prev) => [...prev, trimmedTag].sort()); // Add to available and sort
+        setAvailableTags((prev) => [...prev, trimmedTag].sort()); 
       }
       if (!form.tags.includes(trimmedTag)) {
-        setForm((prev) => ({ ...prev, tags: [...prev.tags, trimmedTag] })); // Select the new tag
-        if (errors.tags) { // Bug Fix: Clear tags error if a tag is added
+        setForm((prev) => ({ ...prev, tags: [...prev.tags, trimmedTag] })); 
+        if (errors.tags) { 
             setErrors(prevErrors => {
                 const newErrors = { ...prevErrors };
                 delete newErrors.tags;
@@ -336,7 +336,7 @@ export default function ProblemEdit() {
     setNewTagInput("");
   };
 
-  // --- Form Submission Handler ---
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -352,14 +352,14 @@ export default function ProblemEdit() {
 
     const newErrors = {};
 
-    // --- Validation Logic (Copied from NewProblem.jsx) ---
+
     if (!form.title.trim()) {
         newErrors.title = "Title is required.";
     }
     if (!form.description.trim()) {
         newErrors.description = "Description is required.";
     }
-    // Validate Sample Test Cases
+
     if (form.sampleTestCases.length === 0) {
         newErrors.sampleTestCases = "At least one sample test case is required.";
     } else {
@@ -368,15 +368,15 @@ export default function ProblemEdit() {
             newErrors.sampleTestCases = "All sample test cases must have input and output values.";
         }
     }
-    // Validate Tags
+
     if (form.tags.length === 0) {
         newErrors.tags = "At least one tag must be selected.";
     }
-    // Validate Editorial
+
     if (form.editorial.trim() === '') {
         newErrors.editorial = "Editorial is required.";
     }
-    // Validate Starter Code
+
     if (form.starterCode.cpp.trim() === '') {
         newErrors['starterCode.cpp'] = "Starter code for C++ is required.";
     }
@@ -388,7 +388,7 @@ export default function ProblemEdit() {
         return;
     }
 
-    // --- Confirmation Dialog (Copied from NewProblem.jsx) ---
+
     let confirmationMessage = "";
     if (form.isPublished) {
         confirmationMessage = "Are you sure you want to PUBLISH this problem immediately?";
@@ -398,20 +398,20 @@ export default function ProblemEdit() {
 
     if (!window.confirm(confirmationMessage)) {
         setIsSubmitting(false);
-        return; // User cancelled
+        return; 
     }
 
     try {
       const problemData = {
         ...form,
-        // Send timeLimit directly in milliseconds as backend expects it
+
         timeLimit: Number(form.timeLimit),
         memoryLimit: Number(form.memoryLimit),
-        // Filter out any empty hints before sending
+
         hints: form.hints.filter(hint => hint.trim() !== ''),
       };
 
-      // CHANGE: Use axios.put for updating
+
       const res = await axios.put(`${API_BASE_URL}/api/problems/${id}`, problemData, {
         headers: {
           "Content-Type": "application/json",
@@ -420,8 +420,8 @@ export default function ProblemEdit() {
       });
 
       setMessage("Problem updated successfully!");
-      setGeneralError(""); // Clear any general errors on success
-      // No form reset needed for edit page, but redirect after success
+      setGeneralError(""); 
+
       setTimeout(() => navigate("/problems"), 1500);
 
     } catch (err) {
@@ -848,7 +848,7 @@ export default function ProblemEdit() {
                       value={tc.input}
                       onChange={(e) => handleTestCaseChange(idx, "input", e.target.value)}
                       className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      // Removed 'required' to allow empty hidden test cases
+
                     />
                   </div>
                   <div className="flex-1">
@@ -862,7 +862,7 @@ export default function ProblemEdit() {
                       value={tc.output}
                       onChange={(e) => handleTestCaseChange(idx, "output", e.target.value)}
                       className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      // Removed 'required' to allow empty hidden test cases
+
                     />
                   </div>
                   <div className="flex items-end justify-between md:justify-start gap-4 mt-2 md:mt-0">

@@ -18,7 +18,7 @@ export default function NewProblem() {
     difficulty: "Easy",
     testCases: [{ input: "", output: "", isPublic: false }],
     tags: [],
-    timeLimit: 1000, // Bug 1 Fix: Default time limit in milliseconds for UI
+    timeLimit: 1000,  
     memoryLimit: 256,
     editorial: "",
     hints: [""],
@@ -68,9 +68,9 @@ export default function NewProblem() {
     const { name, value, type, checked } = e.target;
     let newValue = value;
 
-    // Bug 1 Fix: Convert timeLimit from milliseconds (UI) to seconds (backend)
+
     if (name === "timeLimit" && type === "number") {
-      newValue = Number(value); // Store as milliseconds in state for UI
+      newValue = Number(value); 
     } else if (type === "number") {
       newValue = Number(value);
     } else if (type === "checkbox") {
@@ -107,7 +107,7 @@ export default function NewProblem() {
     const newSampleTestCases = [...form.sampleTestCases];
     newSampleTestCases[idx][field] = value;
     setForm((prev) => ({ ...prev, sampleTestCases: newSampleTestCases }));
-    if (errors.sampleTestCases) { // Bug 2 Fix: Clear sampleTestCases error
+    if (errors.sampleTestCases) { 
       setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors.sampleTestCases;
@@ -180,7 +180,7 @@ export default function NewProblem() {
       ...prev,
       sampleTestCases: [...prev.sampleTestCases, { input: "", output: "", explanation: "" }],
     }));
-    if (errors.sampleTestCases) { // Bug 2 Fix: Clear error when adding a new one
+    if (errors.sampleTestCases) { 
       setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors.sampleTestCases;
@@ -194,7 +194,7 @@ export default function NewProblem() {
       ...prev,
       sampleTestCases: prev.sampleTestCases.filter((_, i) => i !== idx),
     }));
-    if (errors.sampleTestCases) { // Bug 2 Fix: Clear error when removing one
+    if (errors.sampleTestCases) { 
       setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors.sampleTestCases;
@@ -238,7 +238,7 @@ export default function NewProblem() {
       if (currentTags.includes(tag)) {
         return { ...prev, tags: currentTags.filter((t) => t !== tag) };
       } else {
-        // Bug 3 Fix: Clear tags error if a tag is added/removed
+
         if (errors.tags) {
             setErrors(prevErrors => {
                 const newErrors = { ...prevErrors };
@@ -259,7 +259,7 @@ export default function NewProblem() {
       }
       if (!form.tags.includes(trimmedTag)) {
         setForm((prev) => ({ ...prev, tags: [...prev.tags, trimmedTag] }));
-        if (errors.tags) { // Bug 3 Fix: Clear tags error if a tag is added
+        if (errors.tags) { 
             setErrors(prevErrors => {
                 const newErrors = { ...prevErrors };
                 delete newErrors.tags;
@@ -286,7 +286,7 @@ export default function NewProblem() {
 
     const newErrors = {};
 
-    // Bug 2 Fix: Validate Sample Test Cases
+
     if (form.sampleTestCases.length === 0) {
         newErrors.sampleTestCases = "At least one sample test case is required.";
     } else {
@@ -296,17 +296,17 @@ export default function NewProblem() {
         }
     }
 
-    // Bug 3 Fix: Validate Tags
+
     if (form.tags.length === 0) {
         newErrors.tags = "At least one tag must be selected.";
     }
 
-    // Bug 5 Fix: Validate Editorial
+
     if (form.editorial.trim() === '') {
         newErrors.editorial = "Editorial is required.";
     }
 
-    // Bug 5 Fix: Validate Starter Code
+
     if (form.starterCode.cpp.trim() === '') {
         newErrors['starterCode.cpp'] = "Starter code for C++ is required.";
     }
@@ -318,7 +318,7 @@ export default function NewProblem() {
         return;
     }
 
-    // Bug 6 Fix: Confirmation Dialog
+
     let confirmationMessage = "";
     if (form.isPublished) {
         confirmationMessage = "Are you sure you want to PUBLISH this problem immediately?";
@@ -328,7 +328,7 @@ export default function NewProblem() {
 
     if (!window.confirm(confirmationMessage)) {
         setIsSubmitting(false);
-        return; // User cancelled
+        return; 
     }
 
 
@@ -337,7 +337,7 @@ export default function NewProblem() {
         ...form,
         timeLimit: Number(form.timeLimit),
         memoryLimit: Number(form.memoryLimit),
-        hints: form.hints.filter(hint => hint.trim() !== ''), // Filter out empty hints
+        hints: form.hints.filter(hint => hint.trim() !== ''), 
       };
 
       const res = await axios.post(`${API_BASE_URL}/api/problems`, problemData, {
@@ -358,7 +358,7 @@ export default function NewProblem() {
         difficulty: "Easy",
         testCases: [{ input: "", output: "", isPublic: false }],
         tags: [],
-        timeLimit: 1000, // Bug 1 Fix: Reset to milliseconds for UI
+        timeLimit: 1000, 
         memoryLimit: 256,
         editorial: "",
         hints: [""],
@@ -623,7 +623,7 @@ export default function NewProblem() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label htmlFor="timeLimit" className="block text-gray-300 text-sm font-semibold mb-2">
-                        Time Limit (milliseconds): {/* Bug 1 Fix: Label changed */}
+                        Time Limit (milliseconds): 
                     </label>
                     <input
                         type="number"
@@ -632,8 +632,8 @@ export default function NewProblem() {
                         value={form.timeLimit}
                         onChange={handleChange}
                         className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${errors.timeLimit ? 'border-red-500' : 'border-gray-600'} text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                        min="1" // Minimum reasonable time limit in ms
-                        step="1" // Allow integer values
+                        min="1" 
+                        step="1" 
                         required
                     />
                     {errors.timeLimit && <p className="text-red-400 text-sm mt-1">{errors.timeLimit}</p>}
@@ -689,7 +689,7 @@ export default function NewProblem() {
                     rows="8"
                     placeholder="Provide a detailed editorial for the problem solution..."
                     className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${errors.editorial ? 'border-red-500' : 'border-gray-600'} text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                    required // Bug 5 Fix: Made required
+                    required 
                 ></textarea>
                 {errors.editorial && <p className="text-red-400 text-sm mt-1">{errors.editorial}</p>}
             </div>
@@ -741,7 +741,7 @@ export default function NewProblem() {
                     rows="10"
                     placeholder="Provide starter code for C++ (e.g., function signature, boilerplate code)"
                     className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${errors['starterCode.cpp'] ? 'border-red-500' : 'border-gray-600'} text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm`}
-                    required // Bug 5 Fix: Made required
+                    required 
                 ></textarea>
                 {errors['starterCode.cpp'] && <p className="text-red-400 text-sm mt-1">{errors['starterCode.cpp']}</p>}
             </div>

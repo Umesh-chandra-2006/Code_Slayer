@@ -5,10 +5,10 @@ import { jwtDecode } from 'jwt-decode';
 import Button from "../components/UI/Button";
 import Badge from "../components/UI/Badge";
 
-// Lucide React Icons
+
 import { Search, SlidersHorizontal, Tags, SortAsc, ChevronLeft, ChevronRight, XCircle, FileText } from "lucide-react";
 
-// Custom hook for debouncing values
+
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -32,80 +32,80 @@ const ProblemList = () => {
   const [error, setError] = useState(null);
   const token= localStorage.getItem("token");
 
-  // Pagination states
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [problemsPerPage, setProblemsPerPage] = useState(10); // Or whatever your default limit is
+  const [problemsPerPage, setProblemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProblems, setTotalProblems] = useState(0);
 
-  // Filter states
+
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const [selectedDifficulties, setSelectedDifficulties] = useState([]);
-  const [publishedFilter, setPublishedFilter] = useState('all'); // 'all', 'published', 'draft'
+  const [publishedFilter, setPublishedFilter] = useState('all'); 
   const [selectedTags, setSelectedTags] = useState([]);
 
-  // Sort states
-  const [sortBy, setSortBy] = useState('problemNumber'); // Default sort by problemNumber
-  const [sortOrder, setSortOrder] = useState('asc'); // Default ascending
 
-  // Messages for UI feedback
+  const [sortBy, setSortBy] = useState('problemNumber'); 
+  const [sortOrder, setSortOrder] = useState('asc'); 
+
+
   const [message, setMessage] = useState('');
 
-  // States for custom dropdown/popover visibility
+
   const [showDifficultyFilter, setShowDifficultyFilter] = useState(false);
   const [showTagFilter, setShowTagFilter] = useState(false);
   const [showSortOptions, setShowSortOptions] = useState(false);
-  const [showPublishedFilter, setShowPublishedFilter] = useState(false); // New state for published filter
+  const [showPublishedFilter, setShowPublishedFilter] = useState(false);  
 
-  // Ref for dropdowns to handle clicks outside
+
   const difficultyFilterRef = useRef(null);
   const tagFilterRef = useRef(null);
   const sortOptionsRef = useRef(null);
-  const publishedFilterRef = useRef(null); // New ref for published filter
+  const publishedFilterRef = useRef(null); 
 
-  // Hardcoded options for difficulties
+
   const difficultyOptions = ["Easy", "Medium", "Hard"];
   const publishedOptions = [
     { label: "All", value: "all" },
     { label: "Published", value: "published" },
     { label: "Draft", value: "draft" },
   ];
-  // Dynamic tags will be stored here
+
   const [availableTags, setAvailableTags] = useState([]);
 
-  // Admin status state
+
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Effect to determine admin status from token
+
   useEffect(() => {
     const token = localStorage.getItem('token');
 
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
-        // Assuming your token has a 'role' field
+
         setIsAdmin(decodedToken.role === 'admin');
       } catch (error) {
         console.error("Error decoding token:", error);
-        setIsAdmin(false); // Default to not admin if token is invalid
+        setIsAdmin(false);
       }
     } else {
       setIsAdmin(false);
     }
-  }, []); // Run once on mount to set initial admin status
+  }, []); 
 
 
-  // Fetch problems function
+
   const fetchProblems = useCallback(async () => {
     setLoading(true);
     setError(null);
-    setMessage(''); // Clear previous messages
-  console.log("Current publishedFilter state:", publishedFilter); // Confirm state
+    setMessage('');
+  console.log("Current publishedFilter state:", publishedFilter); 
 
     try {
-      // Build query parameters
+
       const params = {
         page: currentPage,
         limit: problemsPerPage,
@@ -120,14 +120,14 @@ const ProblemList = () => {
         params.difficulty = selectedDifficulties.join(',');
       }
       
-      // Send isPublished parameter only if not 'all'
-      // This logic is correct for sending the parameter to the backend.
-      // The backend's buildProblemQuery needs to handle the 'all' case (no param)
-      // and the 'false' case correctly for admins.
+
+
+
+
       if (publishedFilter !== 'all') {
-        params.isPublished = publishedFilter === 'published'; // true or false
+        params.isPublished = publishedFilter === 'published'; 
       }
-        console.log("Params being sent to backend (frontend log):", params); // <-- CRITICAL: What does this show?
+        console.log("Params being sent to backend (frontend log):", params); 
 
       
       if (selectedTags.length > 0) {
@@ -155,34 +155,34 @@ const ProblemList = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, problemsPerPage, debouncedSearchQuery, selectedDifficulties, publishedFilter, selectedTags, sortBy, sortOrder, isAdmin]); // Added isAdmin to dependency array as its value influences the fetch (though not directly for params here, it's good practice if conditional logic was based on it for fetch)
+  }, [currentPage, problemsPerPage, debouncedSearchQuery, selectedDifficulties, publishedFilter, selectedTags, sortBy, sortOrder, isAdmin]); 
 
-  // Fetch available tags
+
   const fetchAvailableTags = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/problems/tags`); // Endpoint for tags
+      const response = await axios.get(`${API_BASE_URL}/api/problems/tags`); 
       setAvailableTags(response.data);
     } catch (err) {
       console.error("Error fetching available tags:", err);
-      // Optionally set an error state for tags, or display a message
+
     }
   }, []);
 
 
-  // UseEffect to fetch problems when dependencies change
-  // We need to re-fetch if isAdmin status changes to apply correct filters automatically
+
+
   useEffect(() => {
     fetchProblems();
-  }, [fetchProblems, isAdmin]); // Dependency array includes fetchProblems and isAdmin
+  }, [fetchProblems, isAdmin]); 
 
 
-  // UseEffect to fetch available tags on component mount
+
   useEffect(() => {
     fetchAvailableTags();
   }, [fetchAvailableTags]);
 
 
-  // Effect for closing dropdowns when clicking outside
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (difficultyFilterRef.current && !difficultyFilterRef.current.contains(event.target)) {
@@ -195,7 +195,7 @@ const ProblemList = () => {
         setShowSortOptions(false);
       }
       if (publishedFilterRef.current && !publishedFilterRef.current.contains(event.target)) {
-        setShowPublishedFilter(false); // New: Close published filter
+        setShowPublishedFilter(false); 
       }
     };
 
@@ -206,21 +206,21 @@ const ProblemList = () => {
   }, []);
 
 
-  // Handlers for filters
+
   const handleDifficultyChange = (difficulty) => {
     setSelectedDifficulties(prev =>
       prev.includes(difficulty)
         ? prev.filter(d => d !== difficulty)
         : [...prev, difficulty]
     );
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1); 
   };
 
-  // NEW: Handle published filter change
+
   const handlePublishedFilterChange = (value) => {
     setPublishedFilter(value);
-    setShowPublishedFilter(false); // Close dropdown
-    setCurrentPage(1); // Reset to first page on filter change
+    setShowPublishedFilter(false); 
+    setCurrentPage(1); 
   };
 
   const handleTagChange = (tag) => {
@@ -229,25 +229,25 @@ const ProblemList = () => {
         ? prev.filter(t => t !== tag)
         : [...prev, tag]
     );
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1); 
   };
 
   const handleSortChange = (newSortBy, newSortOrder) => {
     setSortBy(newSortBy);
     setSortOrder(newSortOrder);
-    setShowSortOptions(false); // Close dropdown
-    setCurrentPage(1); // Reset to first page on sort change
+    setShowSortOptions(false); 
+    setCurrentPage(1); 
   };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to first page on search change
+    setCurrentPage(1); 
   };
 
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedDifficulties([]);
-    setPublishedFilter('all'); // Clear published filter
+    setPublishedFilter('all'); 
     setSelectedTags([]);
     setSortBy('problemNumber');
     setSortOrder('asc');
@@ -262,7 +262,7 @@ const ProblemList = () => {
     setError(null);
     setMessage('');
     try {
-      // Assuming you have a token for authorization
+
       const token = localStorage.getItem('token');
       await axios.delete(`${API_BASE_URL}/api/problems/${id}`, {
         headers: {
@@ -270,7 +270,7 @@ const ProblemList = () => {
         }
       });
       setMessage("Problem deleted successfully!");
-      // Re-fetch problems to update the list
+
       fetchProblems();
     } catch (err) {
       console.error("Error deleting problem:", err);
@@ -360,8 +360,8 @@ const ProblemList = () => {
             )}
           </div>
 
-          {/* NEW: Published Status Filter Dropdown (visible only to admins) */}
-          {isAdmin && ( // Conditionally render based on isAdmin
+          {/*  Published Status Filter Dropdown (visible only to admins) */}
+          {isAdmin && (
             <div className="relative" ref={publishedFilterRef}>
               <Button
                 variant="secondary"
@@ -624,8 +624,7 @@ const ProblemList = () => {
                     <span className="ml-1">{sortOrder === 'asc' ? '▲' : '▼'}</span>
                   )}
                 </th>
-                {/* Only show Status column header if isAdmin */}
-                {isAdmin && ( // Conditionally render based on isAdmin
+                {isAdmin && ( 
                   <th
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
@@ -633,9 +632,7 @@ const ProblemList = () => {
                     Status
                   </th>
                 )}
-                {/* REMOVED: Tags column header as per previous request */}
-                {/* Only show Actions column header if isAdmin */}
-                {isAdmin && ( // Conditionally render based on isAdmin
+                {isAdmin && ( 
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
@@ -670,23 +667,20 @@ const ProblemList = () => {
                       ? `${problem.acceptanceRate.toFixed(2)}%`
                       : 'N/A'}
                   </td>
-                  {/* Only show Status column data if isAdmin */}
-                  {isAdmin && ( // Conditionally render based on isAdmin
+                  {isAdmin && ( 
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <Badge
                         className={`${
                           problem.isPublished
-                            ? 'bg-indigo-500' // Published
-                            : 'bg-gray-500' // Draft
+                            ? 'bg-indigo-500' 
+                            : 'bg-gray-500' 
                         } text-white px-2 py-1 rounded-full text-xs`}
                       >
                         {problem.isPublished ? 'Published' : 'Draft'}
                       </Badge>
                     </td>
                   )}
-                  {/* REMOVED: Tags column data as per previous request */}
-                  {/* Only show Actions column if isAdmin */}
-                  {isAdmin && ( // Conditionally render based on isAdmin
+                  {isAdmin && (
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex gap-2">
                         <Link to={`/problems/${problem._id}/edit`}>

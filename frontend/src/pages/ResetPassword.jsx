@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom"; // Import Link
-import { motion } from "framer-motion"; // For animations
+import { useParams, useNavigate, Link } from "react-router-dom"; 
+import { motion } from "framer-motion"; 
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function ResetPassword() {
@@ -17,7 +17,7 @@ export default function ResetPassword() {
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  // === MOVE THESE FUNCTIONS HERE, OUTSIDE OF handleSubmit ===
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -25,20 +25,20 @@ export default function ResetPassword() {
   const toggleConfirmPasswordVisibility = () => {
     setConfirmShowPassword(!showConfirmPassword);
   };
-  // =========================================================
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
     setError("");
 
-    // These functions should NOT be defined here
-    // const togglePasswordVisibility = () => { // <--- REMOVE THESE LINES
-    //   setShowPassword(!showPassword);
-    // };
-    // const toggleConfirmPasswordVisibility = () => { // <--- REMOVE THESE LINES
-    //   setConfirmShowPassword(!showConfirmPassword);
-    // };
+
+
+
+
+
+
+
 
     if (!password || !confirmPassword) {
       setError("Please fill in all fields.");
@@ -55,7 +55,7 @@ export default function ResetPassword() {
       return;
     }
 
-    setIsLoading(true); // Start loading
+    setIsLoading(true); 
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
@@ -69,7 +69,7 @@ export default function ResetPassword() {
         setMessage(
           data.message || "Password reset successful! Redirecting to login..."
         );
-        setTimeout(() => navigate("/login"), 3000); // Redirect to login after 3 seconds
+        setTimeout(() => navigate("/login"), 3000); 
       } else {
         setError(
           data.message ||
@@ -80,11 +80,11 @@ export default function ResetPassword() {
       console.error("Error during password reset:", err);
       setError("Server error. Please try again later.");
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false); 
     }
   };
 
-  // Animation variants for framer-motion
+
   const formVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: {
@@ -154,8 +154,8 @@ export default function ResetPassword() {
               autoComplete="new-password"
             />
             <button
-              type="button" // Important: type="button" to prevent form submission
-              onClick={togglePasswordVisibility} // This will now work
+              type="button" 
+              onClick={togglePasswordVisibility} 
               className="absolute inset-y-0 right-0 top-7 pr-3 flex items-center text-gray-400 hover:text-gray-200 focus:outline-none"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
@@ -182,8 +182,8 @@ export default function ResetPassword() {
               autoComplete="new-password"
             />
             <button
-              type="button" // Important: type="button" to prevent form submission
-              onClick={toggleConfirmPasswordVisibility} // This will now work
+              type="button"
+              onClick={toggleConfirmPasswordVisibility} 
               className="absolute inset-y-0 right-0 top-7 pr-3 flex items-center text-gray-400 hover:text-gray-200 focus:outline-none"
               aria-label={
                 showConfirmPassword ? "Hide password" : "Show password"
