@@ -7,10 +7,13 @@ const crypto = require("crypto");
 require("dotenv").config();
 
 const pendinguser = {};
+const FRONTEND_URL = process.env.FRONTEND_URL;
+
 
 const code_expiry = 2.5 * 60 * 1000;
 const code_cooldown = 60 * 1000;
 
+//For verification email
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
@@ -21,6 +24,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+//Registration Process
 exports.register = async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -65,6 +69,7 @@ exports.register = async (req, res) => {
   }
 };
 
+//Email verification Process
 exports.verification = async (req, res) => {
   const { email, code } = req.body;
 
@@ -98,6 +103,8 @@ exports.verification = async (req, res) => {
       .json({ message: "Verification failed", error: err.message });
   }
 };
+
+//Login Process
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -107,19 +114,29 @@ exports.login = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
 
     if (!match) return res.status(400).json({ message: "Invalid Credentials" });
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
 
     res.status(200).json({
       token,
-      user: { id: user._id, username: user.username, email: user.email },
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (err) {
     res.status(500).json({ message: "Login failed:", error: err.message });
   }
 };
 
+//Resend Verification Code Process
 exports.resendCode = async (req, res) => {
   const { email } = req.body;
 
@@ -158,11 +175,12 @@ exports.resendCode = async (req, res) => {
   }
 };
 
+//Forgot Password Process
 exports.forgotpassword = async (req, res) => {
   const { email } = req.body;
 
   try {
-    const user = await User.findOne({email});
+    const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const resetToken = crypto.randomBytes(20).toString("hex");
@@ -176,7 +194,11 @@ exports.forgotpassword = async (req, res) => {
     user.resetPasswordExpire = expiry;
     await user.save();
 
-    const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
+    const resetURL = `${FRONTEND_URL}/reset-password/${resetToken}`;
+
+     console.log("Constructed resetURL:", resetURL); // Confirm this is correct
+    console.log("Attempting to send email with GMAIL_USER:", process.env.GMAIL_USER); // VERIFY THIS!
+    console.log("Attempting to send email with GMAIL_PASS length:", process.env.GMAIL_PASS ? process.env.GMAIL_PASS.length : "undefined"); 
 
     const message = `
       <h3> Password Reset Link <h3>
@@ -184,15 +206,26 @@ exports.forgotpassword = async (req, res) => {
       <a href="${resetURL}">${resetURL}</a>
       <p> This link will expire in 10 minutes</p>
       `;
+    console.log(message);
+        console.log("Email HTML message snippet:", message.substring(0, 100) + "..."); // Log a snippet
 
-    await transporter.sendMail({
-      from: `"Online Judge" <${process.env.GMAIL_USER}>`,
-      to: email,
-      subject: "Password Reset Link",
-      html: message,
-    });
-
-    res.status(200).json({ message: "Password reset email sent" });
+    try {
+        await transporter.sendMail({
+            from: `"Online Judge" <${process.env.GMAIL_USER}>`,
+            to: email,
+            subject: "Password Reset Link",
+            html: message,
+        });
+        console.log("Email sent successfully to:", email); // Success message
+        res.status(200).json({ message: "Password reset email sent" });
+    } catch (emailError) {
+        console.error("Nodemailer sendMail Error:", emailError); // Specific error log for nodemailer
+        // You might want to distinguish between email sending error and other errors
+        res.status(500).json({
+            message: "Failed to send password reset email. Please try again later.",
+            error: emailError.message, // Provide the error message
+        });
+    }
   } catch (err) {
     console.error("Forgot Password Error:", err);
     res.status(500).json({
@@ -202,9 +235,9 @@ exports.forgotpassword = async (req, res) => {
   }
 };
 
+//Reset Password Process
 exports.resetpassword = async (req, res) => {
-const { token,  password } = req.body;
-
+  const { token, password } = req.body;
 
   const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
