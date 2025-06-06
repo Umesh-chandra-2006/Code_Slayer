@@ -1,5 +1,7 @@
 const axios = require("axios");
 
+const EMAIL_VALIDATION_API = process.env.EMAIL_VALIDATION_API;
+
 const verifyEmail = async (email) => {
   try {
     const { data } = await axios.get(
