@@ -376,8 +376,8 @@ export default function ViewProblem() {
             <div className="my-6">
               <h3 className="text-xl font-semibold text-gray-200 mb-2">Comments / Forum:</h3>
               <div className="text-gray-400 leading-relaxed bg-gray-800 p-4 rounded-lg border border-gray-700">
-                <p className="mb-2">This section will contain a discussion forum for the problem.</p>
-                <p className="text-sm italic"> (Implementation for comments/forum will go here.)</p>
+                <p className="mb-2">Discussion forum for the problem.</p>
+                <p className="text-sm italic"> (Coming soon/ Stay tuned.)</p>
               </div>
             </div>
           )}

@@ -352,7 +352,6 @@ export default function CodeEditor({
                 </label>
                 <div className="flex-grow relative"> 
                     <Editor
-                        height="500px" 
                         language={monacoLanguageMap[currentLanguage] || "plaintext"}
                         value={code}
                         theme="dark-plus"
