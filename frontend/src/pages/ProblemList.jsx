@@ -160,7 +160,12 @@ const ProblemList = () => {
 
   const fetchAvailableTags = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/problems/tags`); 
+      const response = await axios.get(`${API_BASE_URL}/api/problems/tags`, {
+        headers: {
+          "Content-Type" : "application/json",
+          Authorization : `Bearer ${token}`,
+        },
+      }); 
       setAvailableTags(response.data);
     } catch (err) {
       console.error("Error fetching available tags:", err);
