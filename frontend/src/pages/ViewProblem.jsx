@@ -366,7 +366,7 @@ export default function ViewProblem() {
               <h3 className="text-xl font-semibold text-gray-200 mb-2">Your Submissions:</h3>
               <div className="text-gray-400 leading-relaxed bg-gray-800 p-4 rounded-lg border border-gray-700">
                 <p className="mb-2">This section will display your past submissions for this problem.</p>
-                <p className="text-sm italic"> (Implementation for fetching and displaying submissions will go here.)</p>
+                <p className="text-sm italic"> (Coming soon/ Stay tuned.)</p>
                 {/* Placeholder for submission list if you have one */}
               </div>
             </div>
