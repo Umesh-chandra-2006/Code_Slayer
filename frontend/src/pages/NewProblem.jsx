@@ -30,7 +30,6 @@ export default function NewProblem() {
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
   const [generalError, setGeneralError] = useState("");
-  const [token, setToken] = useState(null);
 
   const [availableTags, setAvailableTags] = useState([]);
   const [newTagInput, setNewTagInput] = useState("");
@@ -38,10 +37,7 @@ export default function NewProblem() {
   const [tagsError, setTagsError] = useState(null);
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-  useEffect(() => {
-    setToken(localStorage.getItem("token"));
-  }, []);
+  const token = localStorage.getItem("token");
 
   const fetchAvailableTags = useCallback(async () => {
     try {
