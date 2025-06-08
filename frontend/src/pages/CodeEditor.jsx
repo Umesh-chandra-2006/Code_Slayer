@@ -357,6 +357,7 @@ export default function CodeEditor({
                         theme="dark-plus"
                         onMount={handleEditorDidMount}
                         onChange={handleCodeChange}
+                        {...(!isControlledByParent ? { height: "400px" } : {})}
                         options={{
                             minimap: { enabled: false },
                             fontSize: 14,
