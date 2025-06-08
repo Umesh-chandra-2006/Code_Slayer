@@ -106,55 +106,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="py-16 bg-gray-900/70 backdrop-blur-sm">
-        <div className="container mx-auto px-6">
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 text-center max-w-6xl mx-auto"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
-          >
-            <motion.div
-              className="bg-gray-800/60 p-8 rounded-2xl shadow-xl border border-gray-700 hover:shadow-2xl transition-all duration-300"
-              variants={itemVariants}
-            >
-              <div className="text-4xl md:text-5xl font-extrabold mb-3 text-white">
-                10K+
-              </div>
-              <div className="text-blue-300 font-semibold">Problems Solved</div>
-            </motion.div>
-            <motion.div
-              className="bg-gray-800/60 p-8 rounded-2xl shadow-xl border border-gray-700 hover:shadow-2xl transition-all duration-300"
-              variants={itemVariants}
-            >
-              <div className="text-4xl md:text-5xl font-extrabold mb-3 text-white">
-                500+
-              </div>
-              <div className="text-purple-300 font-semibold">Daily Active Users</div>
-            </motion.div>
-            <motion.div
-              className="bg-gray-800/60 p-8 rounded-2xl shadow-xl border border-gray-700 hover:shadow-2xl transition-all duration-300"
-              variants={itemVariants}
-            >
-              <div className="text-4xl md:text-5xl font-extrabold mb-3 text-white">
-                99.9%
-              </div>
-              <div className="text-green-300 font-semibold">Uptime</div>
-            </motion.div>
-            <motion.div
-              className="bg-gray-800/60 p-8 rounded-2xl shadow-xl border border-gray-700 hover:shadow-2xl transition-all duration-300 md:col-span-1"  
-              variants={itemVariants}
-            >
-              <div className="text-4xl md:text-5xl font-extrabold mb-3 text-white">
-                10+
-              </div>
-              <div className="text-teal-300 font-semibold">Programming Languages</div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </div>
+    
 
       {/* Features Section */}
       <div className="py-20 bg-gray-900">
