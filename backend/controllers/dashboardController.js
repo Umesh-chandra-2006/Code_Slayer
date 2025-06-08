@@ -91,7 +91,6 @@ const getDashboardData = async (req, res) => {
       const problemId = sub.problem?._id?.toString();
 
       if (!problemId) {
-        console.warn("Skipping submission due to missing problemId:", sub);
         continue;
       }
 
