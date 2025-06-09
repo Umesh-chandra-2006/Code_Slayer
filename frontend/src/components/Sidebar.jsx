@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   FaBars,
@@ -23,12 +23,26 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
+  const [userInitials, setUserInitials] = useState('U');
 
   const expanded = isOpen || isHovered;
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.userName) {
+      const nameParts = user.userName.split(' ');
+      if (nameParts.length >= 2) {
+        setUserInitials(`${nameParts[0].charAt(0)}${nameParts[nameParts.length - 1].charAt(0)}`);
+      } else if (nameParts.length === 1) {
+        setUserInitials(nameParts[0].charAt(0));
+      }
+    }
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userId');
     navigate('/login');
   };
 
@@ -95,6 +109,40 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
         <div className="mt-auto px-2">
           <div className="border-t border-gray-700 mx-2 mb-2" />
+          <Link
+            to="/profile" // Assuming your profile route is /profile
+            className={`
+              flex items-center gap-3 py-2 rounded-md font-medium w-full mb-1 
+              transition-all duration-200
+              ${location.pathname === '/profile' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800'}
+              ${expanded ? 'justify-start px-3' : 'justify-center'}
+            `}
+            aria-label="Go to profile page"
+          >
+            {expanded ? (
+              // Display icon and text when expanded
+              <>
+                <FaUser className="text-2xl shrink-0" />
+                <span className="text-sm transition-all duration-300 opacity-100 ml-1">
+                  Profile
+                </span>
+              </>
+            ) : (
+              // Display user initials circle when collapsed
+              <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold uppercase shrink-0">
+                {userInitials}
+              </div>
+            )}
+            {/* Tooltip for collapsed state */}
+            {!expanded && (
+              <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2
+                bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg
+                opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-40"
+              >
+                Profile
+              </div>
+            )}
+          </Link>
           <button
             onClick={handleLogout}
             className={`

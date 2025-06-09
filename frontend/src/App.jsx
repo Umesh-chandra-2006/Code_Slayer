@@ -16,6 +16,7 @@ import ResetPassword from "./pages/ResetPassword";
 import CodeEditor from "./pages/CodeEditor";
 import SubmissionHistory from "./pages/SubmissionList";
 import Leaderboard from "./pages/Leaderboard";
+import ViewSubmission from "./pages/ViewSubmission";
 
 import DashboardLayout from "./components/DashboardLayout";
 
@@ -43,6 +44,7 @@ function App() {
           <Route path="/editor" element={<CodeEditor />} />
           <Route path="/submissions" element={<SubmissionHistory />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/submissions/:id" element={<ViewSubmission />} />          
         </Route>
         <Route
           path="/problems/new"

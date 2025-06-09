@@ -56,7 +56,7 @@ const handleSubmission = async (req, res) => {
     // Prepare the problemDetails object to send to the Compiler Backend
     const problemDetailsToSend = {
       _id: problem._id,
-      testCases: problem.testCases, 
+      testCases: problem.testCases,
       timeLimit: problem.timeLimit,
       memoryLimit: problem.memoryLimit,
     };
@@ -65,20 +65,18 @@ const handleSubmission = async (req, res) => {
       code: code,
       language: language,
       problemDetails: problemDetailsToSend,
-      isSubmission: true, 
+      isSubmission: true,
     });
 
     const {
-      overallVerdict, 
+      overallVerdict,
       compilationError,
       testResults: compilerTestResults,
       overallRuntime,
       overallMemory,
     } = judgeResponse.data;
 
-  
-
-    savedSubmission.verdict = overallVerdict; 
+    savedSubmission.verdict = overallVerdict;
     savedSubmission.errorMessage = compilationError;
 
     savedSubmission.testResults = Array.isArray(compilerTestResults)
@@ -133,8 +131,7 @@ const handleSubmission = async (req, res) => {
       message = `Submission failed: ${overallVerdict}`;
     }
 
-   
-    const responseTestResultsForFrontend = Array.isArray(compilerTestResults) 
+    const responseTestResultsForFrontend = Array.isArray(compilerTestResults)
       ? compilerTestResults.map((tr) => ({
           status: tr.status,
           time: tr.time,
@@ -147,16 +144,13 @@ const handleSubmission = async (req, res) => {
         }))
       : [];
 
-   
-
-
     return res.status(200).json({
       success: true,
       message: message,
-      verdict: overallVerdict, 
+      verdict: overallVerdict,
       submissionId: savedSubmission._id,
       compilationError: compilationError,
-      testResults: responseTestResultsForFrontend, 
+      testResults: responseTestResultsForFrontend,
       overallRuntime: overallRuntime,
       overallMemory: overallMemory,
     });
@@ -166,8 +160,8 @@ const handleSubmission = async (req, res) => {
       savedSubmission.verdict = "Error";
       let detailedErrorMessage = "Unknown error during judging process.";
       let compilationErrorFromResponse = null;
-      let receivedTestResultsForDB = []; 
-      let responseTestResultsForFrontend = []; 
+      let receivedTestResultsForDB = [];
+      let responseTestResultsForFrontend = [];
       if (axios.isAxiosError(err) && err.response && err.response.data) {
         detailedErrorMessage =
           err.response.data.error ||
@@ -214,7 +208,7 @@ const handleSubmission = async (req, res) => {
       error: "Submission Failed due to an unexpected server error.",
       verdict: "Error",
       compilationError: null,
-      testResults: responseTestResultsForFrontend, 
+      testResults: responseTestResultsForFrontend,
       overallRuntime: null,
       overallMemory: null,
     });
@@ -257,8 +251,39 @@ const getUserSubmissions = async (req, res) => {
   }
 };
 
+const getSubmissionById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    const submission = await Submission.findById(id).populate(
+      "problem",
+      "title description"
+    );
+
+    if (!submission) {
+      return res.status(404).json({ message: "Submission not found." });
+    }
+
+    if (submission.user.toString() !== userId && userRole !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to view this submission." });
+    }
+    res.status(200).json(submission);
+  } catch (error) {
+    console.error("Error fetching submission by ID:", error);
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "Invalid submission ID format." });
+    }
+    res.status(500).json({ message: "Server error.", error: error.message });
+  }
+};
+
 module.exports = {
   handleSubmission,
   getAllSubmissions,
   getUserSubmissions,
+  getSubmissionById,
 };
