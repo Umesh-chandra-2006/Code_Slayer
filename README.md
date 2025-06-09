@@ -24,6 +24,55 @@ Check out the platform live at: [https://codeslayer.me](https://codeslayer.me)
 
 ---
 
+## 🏛️ System Architecture
+
+```
+                    +----------------------+
+                    |      MongoDB         |
+                    |     (Database)       |
+                    +----------+-----------+
+                               |
+                               v
+    +---------+        +-------+-------+       +---------------------------+
+    | Vercel  +------->|   Server      |<----->|  Compiler Backend         |
+    |Frontend |        |   (Render)    |       |   (EC2 + ECR)            |
+    +---------+        +-------+-------+       +---------------------------+
+                               |
+                               v
+                       +---------------+
+                       |    Gemini      |
+                       | (AI Review API)|
+                       +---------------+
+```
+
+- **Main Backend:** Hosted on Render
+- **Frontend:** Hosted on Vercel
+- **Compiler Backend:** Runs on EC2 using Docker image from ECR
+- **Database:** MongoDB
+- **AI Review:** Gemini API
+
+---
+
+## 📸 Screenshots
+
+### Landing Page
+![Landing Page](frontend/public/Landing%20Page.png)
+
+### Problem List
+![Problem List](frontend/public/Problem%20list.png)
+
+### Problem Page
+![Problem Page](frontend/public/Problem%20Page.png)
+
+### Dashboard
+![Dashboard](frontend/public/Dashboard.png)
+
+### Profile Page
+![Profile Page](frontend/public/Profile%20Page.png)
+
+### Submission List
+![Submission List](frontend/public/Submission%20List.png)
+
 ## 🗂️ Project Structure
 
 ```
