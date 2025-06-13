@@ -242,280 +242,287 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 sm:p-6 lg:p-8 flex justify-center">
-      <motion.div
-        className="w-full max-w-7xl"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <Card className="bg-gray-800 border border-gray-700 shadow-xl p-6 lg:p-8">
-          <motion.div variants={itemVariants} className="text-center mb-8">
-            <FaUserCircle className="w-24 h-24 text-blue-400 mx-auto mb-4" />
-            <h2 className="text-3xl font-extrabold text-white">
-              {profileData.userName}
-            </h2>
-          </motion.div>
+    <>
+      <title>Profile | CodeSlayer</title>
+      <meta
+        name="description"
+        content="View and edit your CodeSlayer profile. Track your progress, badges, and achievements."
+      />
+      <div className="min-h-screen bg-gray-900 text-gray-100 p-4 sm:p-6 lg:p-8 flex justify-center">
+        <motion.div
+          className="w-full max-w-7xl"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <Card className="bg-gray-800 border border-gray-700 shadow-xl p-6 lg:p-8">
+            <motion.div variants={itemVariants} className="text-center mb-8">
+              <FaUserCircle className="w-24 h-24 text-blue-400 mx-auto mb-4" />
+              <h2 className="text-3xl font-extrabold text-white">
+                {profileData.userName}
+              </h2>
+            </motion.div>
 
-          <div className="flex flex-col lg:flex-row gap-8">
-            <div className="lg:w-1/3 flex flex-col gap-6">
-              <motion.div variants={itemVariants}>
-                <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center">
-                  <FaUserCircle className="mr-2" /> General Information
-                </h3>
-                <div className="space-y-4 text-left">
-                  <p className="flex items-center text-lg text-gray-300">
-                    <FaEnvelope className="mr-3 text-blue-300" />
-                    <strong>Email:</strong> {profileData.email}
-                  </p>
-                  <p className="flex items-center text-lg text-gray-300">
-                    <FaChartLine className="mr-3 text-green-300" />
-                    <strong>Problems Solved:</strong>{" "}
-                    {profileData.problemsSolved}
-                  </p>
-                  <p className="flex items-center text-lg text-gray-300">
-                    <FaFire className="mr-3 text-orange-400" />
-                    <strong>Current Streak:</strong> {profileData.streak}
-                  </p>
-                </div>
-              </motion.div>
-
-              <motion.div variants={itemVariants}>
-                <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center">
-                  <FaCode className="mr-2" /> Language Usage
-                </h3>
-                {languageChartData.length > 0 ? (
-                  <div className="bg-gray-700 p-4 rounded-lg min-h-[280px] flex items-center justify-center">
-                    {" "}
-                    {/* Added min-height */}
-                    <ResponsiveContainer width="100%" height={250}>
-                      <PieChart>
-                        <Pie
-                          data={languageChartData}
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          labelLine={false}
-                          label={({ name, percent }) =>
-                            `${name} ${(percent * 100).toFixed(0)}%`
-                          }
-                        >
-                          {languageChartData.map((entry, index) => (
-                            <Cell
-                              key={`cell-lang-${index}`}
-                              fill={COLORS[index % COLORS.length]}
-                            />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#333",
-                            border: "none",
-                            borderRadius: "5px",
-                          }}
-                          itemStyle={{ color: "#fff" }}
-                        />
-                        <Legend
-                          layout="horizontal"
-                          verticalAlign="bottom"
-                          align="center"
-                          wrapperStyle={{ color: "#ccc", paddingTop: "10px" }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <div className="bg-gray-700 p-4 rounded-lg min-h-[280px] flex items-center justify-center">
-                    <p className="text-gray-400 text-center py-4">
-                      No language data available yet.
+            <div className="flex flex-col lg:flex-row gap-8">
+              <div className="lg:w-1/3 flex flex-col gap-6">
+                <motion.div variants={itemVariants}>
+                  <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center">
+                    <FaUserCircle className="mr-2" /> General Information
+                  </h3>
+                  <div className="space-y-4 text-left">
+                    <p className="flex items-center text-lg text-gray-300">
+                      <FaEnvelope className="mr-3 text-blue-300" />
+                      <strong>Email:</strong> {profileData.email}
+                    </p>
+                    <p className="flex items-center text-lg text-gray-300">
+                      <FaChartLine className="mr-3 text-green-300" />
+                      <strong>Problems Solved:</strong>{" "}
+                      {profileData.problemsSolved}
+                    </p>
+                    <p className="flex items-center text-lg text-gray-300">
+                      <FaFire className="mr-3 text-orange-400" />
+                      <strong>Current Streak:</strong> {profileData.streak}
                     </p>
                   </div>
-                )}
-              </motion.div>
+                </motion.div>
 
-              <motion.div variants={itemVariants}>
-                <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center">
-                  <FaAward className="mr-2" /> Difficulty Breakdown
-                </h3>
-                {difficultyChartData.length > 0 ? (
-                  <div className="bg-gray-700 p-4 rounded-lg min-h-[280px] flex items-center justify-center">
-                    {" "}
-                    {/* Added min-height */}
-                    <ResponsiveContainer width="100%" height={250}>
-                      <PieChart>
-                        <Pie
-                          data={difficultyChartData}
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          labelLine={false}
-                          label={({ name, value }) => `${name} (${value})`}
-                        >
-                          {difficultyChartData.map((entry, index) => (
-                            <Cell
-                              key={`cell-diff-${index}`}
-                              fill={DIFFICULTY_COLORS[entry.name]}
-                            />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#333",
-                            border: "none",
-                            borderRadius: "5px",
-                          }}
-                          itemStyle={{ color: "#fff" }}
-                        />
-                        <Legend
-                          layout="horizontal"
-                          verticalAlign="bottom"
-                          align="center"
-                          wrapperStyle={{ color: "#ccc", paddingTop: "10px" }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <div className="bg-gray-700 p-4 rounded-lg min-h-[280px] flex items-center justify-center">
-                    <p className="text-gray-400 text-center py-4">
-                      Solve problems to see breakdown.
-                    </p>
-                  </div>
-                )}
-              </motion.div>
-            </div>
-
-            <div className="lg:flex-1 flex flex-col gap-6">
-              <motion.div variants={itemVariants} className="mt-0">
-                <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center">
-                  <FaCalendarAlt className="mr-2 text-teal-300" /> Daily
-                  Submissions (Last 365 Days)
-                </h3>
-                <div className="relative p-2 border border-gray-700 rounded-lg bg-gray-700 overflow-x-auto custom-scrollbar-horizontal">
-                  {" "}
-                  {/* Added overflow-x-auto */}
-                  <div className="relative h-5 mb-1 ml-[30px] flex text-xs text-gray-400 pointer-events-none">
-                    {heatmapData.monthLabels.map((month, idx) => (
-                      <span
-                        key={idx}
-                        className="absolute text-left"
-                        style={{ left: `${month.offset}px` }}
-                      >
-                        {month.month}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex">
-                    <div className="flex flex-col gap-0.5 text-gray-400 text-xs pr-2 flex-shrink-0">
-                      {daysOfWeekLabels.map((day, index) => (
-                        <div
-                          key={index}
-                          className="h-3 flex items-center justify-end"
-                        >
-                          {day}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div
-                      className="grid gap-0.5"
-                      style={{
-                        gridTemplateColumns: `repeat(${heatmapData.numWeeks}, minmax(0, 1fr))`,
-                        gridTemplateRows: "repeat(7, minmax(0, 1fr))",
-
-                        width: `${heatmapData.numWeeks * 14}px`,
-                      }}
-                    >
-                      {heatmapData.grid.flat().map((dayData, index) => (
-                        <div
-                          key={index}
-                          title={
-                            dayData && !dayData.isEmpty
-                              ? `${dayData.date.toLocaleDateString("en-US", {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                })}: ${dayData.count} submissions`
-                              : "No submissions"
-                          }
-                          className={`w-3 h-3 border border-gray-700 rounded-sm transition-colors duration-150 ${
-                            dayData.isEmpty
-                              ? "bg-gray-900 cursor-not-allowed"
-                              : getHeatmapColor(dayData.count)
-                          }`}
-                        ></div>
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-right text-gray-500 text-sm mt-4 w-full">
-                    More green = more submissions!
-                  </p>
-                </div>
-              </motion.div>
-
-              {/* Recent Submissions Section */}
-              <motion.div variants={itemVariants} className="mt-6">
-                <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center">
-                  <FaListAlt className="mr-2 text-blue-300" /> Recent
-                  Submissions
-                </h3>
-                <div className="bg-gray-700 p-4 rounded-lg border border-gray-600">
-                  {profileData.recentSubmissions &&
-                  profileData.recentSubmissions.length > 0 ? (
-                    <ul className="space-y-3">
-                      {profileData.recentSubmissions.map(
-                        (submission, index) => (
-                          <li
-                            key={index}
-                            className="bg-gray-600 p-3 rounded-md flex justify-between items-center text-gray-200"
+                <motion.div variants={itemVariants}>
+                  <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center">
+                    <FaCode className="mr-2" /> Language Usage
+                  </h3>
+                  {languageChartData.length > 0 ? (
+                    <div className="bg-gray-700 p-4 rounded-lg min-h-[280px] flex items-center justify-center">
+                      {" "}
+                      {/* Added min-height */}
+                      <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                          <Pie
+                            data={languageChartData}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                            labelLine={false}
+                            label={({ name, percent }) =>
+                              `${name} ${(percent * 100).toFixed(0)}%`
+                            }
                           >
-                            <span>{submission.problemName}</span>
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                                submission.verdict === "Accepted"
-                                  ? "bg-green-500"
-                                  : "bg-red-500"
-                              }`}
-                            >
-                              {submission.verdict}
-                            </span>
-                          </li>
-                        )
-                      )}
-                    </ul>
+                            {languageChartData.map((entry, index) => (
+                              <Cell
+                                key={`cell-lang-${index}`}
+                                fill={COLORS[index % COLORS.length]}
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "#333",
+                              border: "none",
+                              borderRadius: "5px",
+                            }}
+                            itemStyle={{ color: "#fff" }}
+                          />
+                          <Legend
+                            layout="horizontal"
+                            verticalAlign="bottom"
+                            align="center"
+                            wrapperStyle={{ color: "#ccc", paddingTop: "10px" }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
                   ) : (
-                    <p className="text-gray-400">
-                      No recent submissions to display.
-                    </p>
+                    <div className="bg-gray-700 p-4 rounded-lg min-h-[280px] flex items-center justify-center">
+                      <p className="text-gray-400 text-center py-4">
+                        No language data available yet.
+                      </p>
+                    </div>
                   )}
-                  <Button
-                    variant="secondary"
-                    className="mt-4 w-full"
-                    onClick={() => navigate("/submissions")}
-                  >
-                    View All Submissions
-                  </Button>
-                </div>
-              </motion.div>
-            </div>
-          </div>
+                </motion.div>
 
-          <motion.div variants={itemVariants} className="mt-8 text-center">
-            <Button
-              variant="primary"
-              className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 shadow-lg"
-              onClick={() => alert("Edit Profile functionality coming soon!")}
-            >
-              Edit Profile
-            </Button>
-          </motion.div>
-        </Card>
-      </motion.div>
-    </div>
+                <motion.div variants={itemVariants}>
+                  <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center">
+                    <FaAward className="mr-2" /> Difficulty Breakdown
+                  </h3>
+                  {difficultyChartData.length > 0 ? (
+                    <div className="bg-gray-700 p-4 rounded-lg min-h-[280px] flex items-center justify-center">
+                      {" "}
+                      {/* Added min-height */}
+                      <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                          <Pie
+                            data={difficultyChartData}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                            labelLine={false}
+                            label={({ name, value }) => `${name} (${value})`}
+                          >
+                            {difficultyChartData.map((entry, index) => (
+                              <Cell
+                                key={`cell-diff-${index}`}
+                                fill={DIFFICULTY_COLORS[entry.name]}
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "#333",
+                              border: "none",
+                              borderRadius: "5px",
+                            }}
+                            itemStyle={{ color: "#fff" }}
+                          />
+                          <Legend
+                            layout="horizontal"
+                            verticalAlign="bottom"
+                            align="center"
+                            wrapperStyle={{ color: "#ccc", paddingTop: "10px" }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-700 p-4 rounded-lg min-h-[280px] flex items-center justify-center">
+                      <p className="text-gray-400 text-center py-4">
+                        Solve problems to see breakdown.
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              </div>
+
+              <div className="lg:flex-1 flex flex-col gap-6">
+                <motion.div variants={itemVariants} className="mt-0">
+                  <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center">
+                    <FaCalendarAlt className="mr-2 text-teal-300" /> Daily
+                    Submissions (Last 365 Days)
+                  </h3>
+                  <div className="relative p-2 border border-gray-700 rounded-lg bg-gray-700 overflow-x-auto custom-scrollbar-horizontal">
+                    {" "}
+                    {/* Added overflow-x-auto */}
+                    <div className="relative h-5 mb-1 ml-[30px] flex text-xs text-gray-400 pointer-events-none">
+                      {heatmapData.monthLabels.map((month, idx) => (
+                        <span
+                          key={idx}
+                          className="absolute text-left"
+                          style={{ left: `${month.offset}px` }}
+                        >
+                          {month.month}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex">
+                      <div className="flex flex-col gap-0.5 text-gray-400 text-xs pr-2 flex-shrink-0">
+                        {daysOfWeekLabels.map((day, index) => (
+                          <div
+                            key={index}
+                            className="h-3 flex items-center justify-end"
+                          >
+                            {day}
+                          </div>
+                        ))}
+                      </div>
+
+                      <div
+                        className="grid gap-0.5"
+                        style={{
+                          gridTemplateColumns: `repeat(${heatmapData.numWeeks}, minmax(0, 1fr))`,
+                          gridTemplateRows: "repeat(7, minmax(0, 1fr))",
+
+                          width: `${heatmapData.numWeeks * 14}px`,
+                        }}
+                      >
+                        {heatmapData.grid.flat().map((dayData, index) => (
+                          <div
+                            key={index}
+                            title={
+                              dayData && !dayData.isEmpty
+                                ? `${dayData.date.toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  })}: ${dayData.count} submissions`
+                                : "No submissions"
+                            }
+                            className={`w-3 h-3 border border-gray-700 rounded-sm transition-colors duration-150 ${
+                              dayData.isEmpty
+                                ? "bg-gray-900 cursor-not-allowed"
+                                : getHeatmapColor(dayData.count)
+                            }`}
+                          ></div>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-right text-gray-500 text-sm mt-4 w-full">
+                      More green = more submissions!
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* Recent Submissions Section */}
+                <motion.div variants={itemVariants} className="mt-6">
+                  <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center">
+                    <FaListAlt className="mr-2 text-blue-300" /> Recent
+                    Submissions
+                  </h3>
+                  <div className="bg-gray-700 p-4 rounded-lg border border-gray-600">
+                    {profileData.recentSubmissions &&
+                    profileData.recentSubmissions.length > 0 ? (
+                      <ul className="space-y-3">
+                        {profileData.recentSubmissions.map(
+                          (submission, index) => (
+                            <li
+                              key={index}
+                              className="bg-gray-600 p-3 rounded-md flex justify-between items-center text-gray-200"
+                            >
+                              <span>{submission.problemName}</span>
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                  submission.verdict === "Accepted"
+                                    ? "bg-green-500"
+                                    : "bg-red-500"
+                                }`}
+                              >
+                                {submission.verdict}
+                              </span>
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    ) : (
+                      <p className="text-gray-400">
+                        No recent submissions to display.
+                      </p>
+                    )}
+                    <Button
+                      variant="secondary"
+                      className="mt-4 w-full"
+                      onClick={() => navigate("/submissions")}
+                    >
+                      View All Submissions
+                    </Button>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            <motion.div variants={itemVariants} className="mt-8 text-center">
+              <Button
+                variant="primary"
+                className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 shadow-lg"
+                onClick={() => alert("Edit Profile functionality coming soon!")}
+              >
+                Edit Profile
+              </Button>
+            </motion.div>
+          </Card>
+        </motion.div>
+      </div>
+    </>
   );
 };
 

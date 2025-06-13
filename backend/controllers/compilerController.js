@@ -67,7 +67,7 @@ const testAgainstAllCases = async (req, res) => {
 
   try {
     // 1. Fetch problem details including test cases from main backend's DB
-    const problem = await Problem.findById(problemId);
+    const problem = await Problem.findOne( {slug : problemId});
     if (!problem) {
       return res
         .status(404)

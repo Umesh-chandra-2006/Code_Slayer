@@ -519,675 +519,696 @@ export default function ProblemEdit() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 p-8 text-gray-100 flex items-center justify-center">
-      <motion.div
-        className="w-full max-w-4xl"
-        initial="hidden"
-        animate="visible"
-        variants={formVariants}
-      >
-        <Card className="bg-gray-800 border border-gray-700 shadow-xl p-8">
-          <h2 className="text-3xl font-extrabold text-white mb-6 text-center">
-            Edit Problem
-          </h2>
+    <>
+      <title>Edit Problem | Admin | CodeSlayer</title>
+      <meta
+        name="description"
+        content="Edit and update existing coding problems on the CodeSlayer platform."
+      />
+      <div className="min-h-screen bg-gray-900 p-8 text-gray-100 flex items-center justify-center">
+        <motion.div
+          className="w-full max-w-4xl"
+          initial="hidden"
+          animate="visible"
+          variants={formVariants}
+        >
+          <Card className="bg-gray-800 border border-gray-700 shadow-xl p-8">
+            <h2 className="text-3xl font-extrabold text-white mb-6 text-center">
+              Edit Problem
+            </h2>
 
-          {message && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="bg-green-500/20 text-green-300 p-3 rounded-lg mb-4 text-center border border-green-500"
-            >
-              {message}
-            </motion.p>
-          )}
-          {generalError && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="bg-red-500/20 text-red-300 p-3 rounded-lg mb-4 text-center border border-red-500"
-            >
-              {generalError}
-            </motion.p>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label
-                htmlFor="title"
-                className="block text-gray-300 text-sm font-semibold mb-2"
+            {message && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="bg-green-500/20 text-green-300 p-3 rounded-lg mb-4 text-center border border-green-500"
               >
-                Title:
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                value={form.title}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
-                  errors.title ? "border-red-500" : "border-gray-600"
-                } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                required
-              />
-              {errors.title && (
-                <p className="text-red-400 text-sm mt-1">{errors.title}</p>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="description"
-                className="block text-gray-300 text-sm font-semibold mb-2"
+                {message}
+              </motion.p>
+            )}
+            {generalError && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="bg-red-500/20 text-red-300 p-3 rounded-lg mb-4 text-center border border-red-500"
               >
-                Description:
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={form.description}
-                onChange={handleChange}
-                rows="5"
-                className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
-                  errors.description ? "border-red-500" : "border-gray-600"
-                } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                required
-              ></textarea>
-              {errors.description && (
-                <p className="text-red-400 text-sm mt-1">
-                  {errors.description}
-                </p>
-              )}
-            </div>
+                {generalError}
+              </motion.p>
+            )}
 
-            {/* Tags selection UI */}
-            <div>
-              <label className="block text-gray-300 text-sm font-bold mb-2">
-                Tags:
-              </label>
-              {tagsLoading ? (
-                <p className="text-gray-400 text-sm p-3">Loading tags...</p>
-              ) : tagsError ? (
-                <p className="text-red-500 text-sm p-3 border border-red-500 rounded-lg">
-                  {tagsError}
-                </p>
-              ) : (
-                <div
-                  className={`flex flex-wrap gap-2 p-3 bg-gray-700 rounded-lg border ${
-                    errors.tags ? "border-red-500" : "border-gray-600"
-                  }`}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label
+                  htmlFor="title"
+                  className="block text-gray-300 text-sm font-semibold mb-2"
                 >
-                  {availableTags.length === 0 ? (
-                    <p className="text-gray-400 text-sm">
-                      No tags available. Add new tags below.
-                    </p>
-                  ) : (
-                    availableTags.map((tag) => (
-                      <Badge
-                        key={tag}
-                        className={`cursor-pointer px-3 py-1 rounded-full text-sm ${
-                          form.tags.includes(tag)
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-600 text-gray-300 hover:bg-gray-500"
-                        }`}
-                        onClick={() => handleTagToggle(tag)}
-                      >
-                        {tag}
-                      </Badge>
-                    ))
-                  )}
-                </div>
-              )}
-              <div className="mt-4 flex gap-2">
+                  Title:
+                </label>
                 <input
                   type="text"
-                  placeholder="Create new tag..."
-                  value={newTagInput}
-                  onChange={(e) => setNewTagInput(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleAddTag();
-                    }
-                  }}
-                  className="flex-1 px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="title"
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
+                    errors.title ? "border-red-500" : "border-gray-600"
+                  } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  required
                 />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleAddTag}
-                  className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg"
-                  disabled={!newTagInput.trim()}
-                >
-                  Add Tag
-                </Button>
+                {errors.title && (
+                  <p className="text-red-400 text-sm mt-1">{errors.title}</p>
+                )}
               </div>
-              {errors.tags && (
-                <p className="text-red-400 text-sm mt-1">{errors.tags}</p>
-              )}
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label
-                  htmlFor="inputFormat"
+                  htmlFor="description"
                   className="block text-gray-300 text-sm font-semibold mb-2"
                 >
-                  Input Format:
+                  Description:
                 </label>
                 <textarea
-                  id="inputFormat"
-                  name="inputFormat"
-                  value={form.inputFormat}
+                  id="description"
+                  name="description"
+                  value={form.description}
                   onChange={handleChange}
-                  rows="3"
+                  rows="5"
                   className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
-                    errors.inputFormat ? "border-red-500" : "border-gray-600"
+                    errors.description ? "border-red-500" : "border-gray-600"
                   } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  required
                 ></textarea>
-                {errors.inputFormat && (
+                {errors.description && (
                   <p className="text-red-400 text-sm mt-1">
-                    {errors.inputFormat}
+                    {errors.description}
                   </p>
                 )}
               </div>
-              <div>
-                <label
-                  htmlFor="outputFormat"
-                  className="block text-gray-300 text-sm font-semibold mb-2"
-                >
-                  Output Format:
-                </label>
-                <textarea
-                  id="outputFormat"
-                  name="outputFormat"
-                  value={form.outputFormat}
-                  onChange={handleChange}
-                  rows="3"
-                  className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
-                    errors.outputFormat ? "border-red-500" : "border-gray-600"
-                  } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                ></textarea>
-                {errors.outputFormat && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {errors.outputFormat}
-                  </p>
-                )}
-              </div>
-            </div>
 
-            {/* NEW: Sample Test Cases Section */}
-            <div
-              className={`border rounded-lg p-5 bg-gray-800/50 ${
-                errors.sampleTestCases ? "border-red-500" : "border-gray-600"
-              }`}
-            >
-              <h3 className="text-xl font-semibold text-white mb-4">
-                Sample Test Cases (Public)
-              </h3>
-              {form.sampleTestCases.map((sample, idx) => (
-                <div
-                  key={`sample-${idx}`}
-                  className="flex flex-col gap-4 mb-4 p-4 border border-gray-700 rounded-lg bg-gray-700/50"
-                >
-                  <div>
-                    <label
-                      htmlFor={`sampleInput-${idx}`}
-                      className="block text-gray-400 text-sm font-medium mb-1"
-                    >
-                      Sample Input {idx + 1}:
-                    </label>
-                    <textarea
-                      id={`sampleInput-${idx}`}
-                      placeholder="Sample Test Case Input"
-                      rows={2}
-                      value={sample.input}
-                      onChange={(e) =>
-                        handleSampleTestCaseChange(idx, "input", e.target.value)
-                      }
-                      className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor={`sampleOutput-${idx}`}
-                      className="block text-gray-400 text-sm font-medium mb-1"
-                    >
-                      Sample Expected Output {idx + 1}:
-                    </label>
-                    <textarea
-                      id={`sampleOutput-${idx}`}
-                      placeholder="Sample Expected Output"
-                      rows={2}
-                      value={sample.output}
-                      onChange={(e) =>
-                        handleSampleTestCaseChange(
-                          idx,
-                          "output",
-                          e.target.value
-                        )
-                      }
-                      className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor={`sampleExplanation-${idx}`}
-                      className="block text-gray-400 text-sm font-medium mb-1"
-                    >
-                      Explanation {idx + 1} (Optional):
-                    </label>
-                    <textarea
-                      id={`sampleExplanation-${idx}`}
-                      placeholder="Explanation for sample test case"
-                      rows={2}
-                      value={sample.explanation}
-                      onChange={(e) =>
-                        handleSampleTestCaseChange(
-                          idx,
-                          "explanation",
-                          e.target.value
-                        )
-                      }
-                      className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => removeSampleTestCase(idx)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 mt-2"
+              {/* Tags selection UI */}
+              <div>
+                <label className="block text-gray-300 text-sm font-bold mb-2">
+                  Tags:
+                </label>
+                {tagsLoading ? (
+                  <p className="text-gray-400 text-sm p-3">Loading tags...</p>
+                ) : tagsError ? (
+                  <p className="text-red-500 text-sm p-3 border border-red-500 rounded-lg">
+                    {tagsError}
+                  </p>
+                ) : (
+                  <div
+                    className={`flex flex-wrap gap-2 p-3 bg-gray-700 rounded-lg border ${
+                      errors.tags ? "border-red-500" : "border-gray-600"
+                    }`}
                   >
-                    Remove Sample
-                  </Button>
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={addSampleTestCase}
-                className="w-full py-2 border-dashed border-blue-500 text-blue-400 hover:bg-blue-900/20"
-              >
-                Add Sample Test Case
-              </Button>
-              {errors.sampleTestCases && (
-                <p className="text-red-400 text-sm mt-2">
-                  {errors.sampleTestCases}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="constraints"
-                className="block text-gray-300 text-sm font-semibold mb-2"
-              >
-                Constraints:
-              </label>
-              <textarea
-                id="constraints"
-                name="constraints"
-                value={form.constraints}
-                onChange={handleChange}
-                rows="3"
-                className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
-                  errors.constraints ? "border-red-500" : "border-gray-600"
-                } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              ></textarea>
-              {errors.constraints && (
-                <p className="text-red-400 text-sm mt-1">
-                  {errors.constraints}
-                </p>
-              )}
-            </div>
-
-            {/* NEW: Time and Memory Limits */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label
-                  htmlFor="timeLimit"
-                  className="block text-gray-300 text-sm font-semibold mb-2"
-                >
-                  Time Limit (milliseconds):
-                </label>
-                <input
-                  type="number"
-                  id="timeLimit"
-                  name="timeLimit"
-                  value={form.timeLimit}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
-                    errors.timeLimit ? "border-red-500" : "border-gray-600"
-                  } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                  min="1"
-                  step="1"
-                  required
-                />
-                {errors.timeLimit && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {errors.timeLimit}
-                  </p>
+                    {availableTags.length === 0 ? (
+                      <p className="text-gray-400 text-sm">
+                        No tags available. Add new tags below.
+                      </p>
+                    ) : (
+                      availableTags.map((tag) => (
+                        <Badge
+                          key={tag}
+                          className={`cursor-pointer px-3 py-1 rounded-full text-sm ${
+                            form.tags.includes(tag)
+                              ? "bg-blue-600 text-white"
+                              : "bg-gray-600 text-gray-300 hover:bg-gray-500"
+                          }`}
+                          onClick={() => handleTagToggle(tag)}
+                        >
+                          {tag}
+                        </Badge>
+                      ))
+                    )}
+                  </div>
                 )}
-              </div>
-              <div>
-                <label
-                  htmlFor="memoryLimit"
-                  className="block text-gray-300 text-sm font-semibold mb-2"
-                >
-                  Memory Limit (MB):
-                </label>
-                <input
-                  type="number"
-                  id="memoryLimit"
-                  name="memoryLimit"
-                  value={form.memoryLimit}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
-                    errors.memoryLimit ? "border-red-500" : "border-gray-600"
-                  } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                  min="1"
-                  step="1"
-                  required
-                />
-                {errors.memoryLimit && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {errors.memoryLimit}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="difficulty"
-                className="block text-gray-300 text-sm font-semibold mb-2"
-              >
-                Difficulty:
-              </label>
-              <select
-                id="difficulty"
-                name="difficulty"
-                value={form.difficulty}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
-                  errors.difficulty ? "border-red-500" : "border-gray-600"
-                } text-white focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                required
-              >
-                <option value="Easy">Easy</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
-              </select>
-              {errors.difficulty && (
-                <p className="text-red-400 text-sm mt-1">{errors.difficulty}</p>
-              )}
-            </div>
-
-            {/* NEW: Editorial Section */}
-            <div>
-              <label
-                htmlFor="editorial"
-                className="block text-gray-300 text-sm font-semibold mb-2"
-              >
-                Editorial:
-              </label>
-              <textarea
-                id="editorial"
-                name="editorial"
-                value={form.editorial}
-                onChange={handleChange}
-                rows="8"
-                placeholder="Provide a detailed editorial for the problem solution..."
-                className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
-                  errors.editorial ? "border-red-500" : "border-gray-600"
-                } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                required
-              ></textarea>
-              {errors.editorial && (
-                <p className="text-red-400 text-sm mt-1">{errors.editorial}</p>
-              )}
-            </div>
-
-            {/* NEW: Hints Section */}
-            <div
-              className={`border rounded-lg p-5 bg-gray-800/50 ${
-                errors.hints ? "border-red-500" : "border-gray-600"
-              }`}
-            >
-              <h3 className="text-xl font-semibold text-white mb-4">
-                Hints (Optional)
-              </h3>
-              {form.hints.map((hint, idx) => (
-                <div
-                  key={`hint-${idx}`}
-                  className="flex gap-4 mb-4 items-center"
-                >
-                  <textarea
-                    id={`hint-${idx}`}
-                    placeholder={`Hint ${idx + 1}`}
-                    rows={2}
-                    value={hint}
-                    onChange={(e) => handleHintChange(idx, e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                <div className="mt-4 flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Create new tag..."
+                    value={newTagInput}
+                    onChange={(e) => setNewTagInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddTag();
+                      }
+                    }}
+                    className="flex-1 px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <Button
                     type="button"
-                    variant="destructive"
-                    onClick={() => removeHint(idx)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2"
+                    variant="secondary"
+                    onClick={handleAddTag}
+                    className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg"
+                    disabled={!newTagInput.trim()}
                   >
-                    Remove
+                    Add Tag
                   </Button>
                 </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={addHint}
-                className="w-full py-2 border-dashed border-blue-500 text-blue-400 hover:bg-blue-900/20"
-              >
-                Add Hint
-              </Button>
-              {errors.hints && (
-                <p className="text-red-400 text-sm mt-2">{errors.hints}</p>
-              )}
-            </div>
+                {errors.tags && (
+                  <p className="text-red-400 text-sm mt-1">{errors.tags}</p>
+                )}
+              </div>
 
-            {/* NEW: Starter Code Section */}
-            <div>
-              <label
-                htmlFor="starterCodeCpp"
-                className="block text-gray-300 text-sm font-semibold mb-2"
-              >
-                Starter Code (C++):
-              </label>
-              <textarea
-                id="starterCodeCpp"
-                name="starterCodeCpp"
-                value={form.starterCode.cpp}
-                onChange={(e) => handleStarterCodeChange("cpp", e.target.value)}
-                rows="10"
-                placeholder="Provide starter code for C++ (e.g., function signature, boilerplate code)"
-                className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
-                  errors["starterCode.cpp"]
-                    ? "border-red-500"
-                    : "border-gray-600"
-                } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm`}
-                required
-              ></textarea>
-              {errors["starterCode.cpp"] && (
-                <p className="text-red-400 text-sm mt-1">
-                  {errors["starterCode.cpp"]}
-                </p>
-              )}
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label
+                    htmlFor="inputFormat"
+                    className="block text-gray-300 text-sm font-semibold mb-2"
+                  >
+                    Input Format:
+                  </label>
+                  <textarea
+                    id="inputFormat"
+                    name="inputFormat"
+                    value={form.inputFormat}
+                    onChange={handleChange}
+                    rows="3"
+                    className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
+                      errors.inputFormat ? "border-red-500" : "border-gray-600"
+                    } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  ></textarea>
+                  {errors.inputFormat && (
+                    <p className="text-red-400 text-sm mt-1">
+                      {errors.inputFormat}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label
+                    htmlFor="outputFormat"
+                    className="block text-gray-300 text-sm font-semibold mb-2"
+                  >
+                    Output Format:
+                  </label>
+                  <textarea
+                    id="outputFormat"
+                    name="outputFormat"
+                    value={form.outputFormat}
+                    onChange={handleChange}
+                    rows="3"
+                    className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
+                      errors.outputFormat ? "border-red-500" : "border-gray-600"
+                    } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  ></textarea>
+                  {errors.outputFormat && (
+                    <p className="text-red-400 text-sm mt-1">
+                      {errors.outputFormat}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-            {/* Test Cases Section */}
-            <div
-              className={`border rounded-lg p-5 bg-gray-800/50 ${
-                errors.testCases ? "border-red-500" : "border-gray-600"
-              }`}
-            >
-              <h3 className="text-xl font-semibold text-white mb-4">
-                Hidden Test Cases (Private)
-              </h3>
-              {form.testCases.map((tc, idx) => (
-                <div
-                  key={`hidden-${idx}`}
-                  className="flex flex-col md:flex-row gap-4 mb-4 p-4 border border-gray-700 rounded-lg bg-gray-700/50"
-                >
-                  <div className="flex-1">
-                    <label
-                      htmlFor={`input-${idx}`}
-                      className="block text-gray-400 text-sm font-medium mb-1"
-                    >
-                      Input {idx + 1}:
-                    </label>
-                    <textarea
-                      id={`input-${idx}`}
-                      placeholder="Test Case Input"
-                      rows={2}
-                      value={tc.input}
-                      onChange={(e) =>
-                        handleTestCaseChange(idx, "input", e.target.value)
-                      }
-                      className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label
-                      htmlFor={`output-${idx}`}
-                      className="block text-gray-400 text-sm font-medium mb-1"
-                    >
-                      Expected Output {idx + 1}:
-                    </label>
-                    <textarea
-                      id={`output-${idx}`}
-                      placeholder="Expected Output"
-                      rows={2}
-                      value={tc.output}
-                      onChange={(e) =>
-                        handleTestCaseChange(idx, "output", e.target.value)
-                      }
-                      className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div className="flex items-end justify-between md:justify-start gap-4 mt-2 md:mt-0">
-                    <label
-                      htmlFor={`isPublic-${idx}`}
-                      className="flex items-center text-gray-300 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        id={`isPublic-${idx}`}
-                        checked={tc.isPublic}
+              {/* NEW: Sample Test Cases Section */}
+              <div
+                className={`border rounded-lg p-5 bg-gray-800/50 ${
+                  errors.sampleTestCases ? "border-red-500" : "border-gray-600"
+                }`}
+              >
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  Sample Test Cases (Public)
+                </h3>
+                {form.sampleTestCases.map((sample, idx) => (
+                  <div
+                    key={`sample-${idx}`}
+                    className="flex flex-col gap-4 mb-4 p-4 border border-gray-700 rounded-lg bg-gray-700/50"
+                  >
+                    <div>
+                      <label
+                        htmlFor={`sampleInput-${idx}`}
+                        className="block text-gray-400 text-sm font-medium mb-1"
+                      >
+                        Sample Input {idx + 1}:
+                      </label>
+                      <textarea
+                        id={`sampleInput-${idx}`}
+                        placeholder="Sample Test Case Input"
+                        rows={2}
+                        value={sample.input}
                         onChange={(e) =>
-                          handleTestCaseChange(
+                          handleSampleTestCaseChange(
                             idx,
-                            "isPublic",
-                            e.target.checked
+                            "input",
+                            e.target.value
                           )
                         }
-                        className="form-checkbox h-4 w-4 text-blue-500 transition duration-150 ease-in-out bg-gray-700 border-gray-500 rounded"
+                        className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
-                      <span className="ml-2 text-sm">Make Public</span>
-                    </label>
+                    </div>
+                    <div>
+                      <label
+                        htmlFor={`sampleOutput-${idx}`}
+                        className="block text-gray-400 text-sm font-medium mb-1"
+                      >
+                        Sample Expected Output {idx + 1}:
+                      </label>
+                      <textarea
+                        id={`sampleOutput-${idx}`}
+                        placeholder="Sample Expected Output"
+                        rows={2}
+                        value={sample.output}
+                        onChange={(e) =>
+                          handleSampleTestCaseChange(
+                            idx,
+                            "output",
+                            e.target.value
+                          )
+                        }
+                        className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor={`sampleExplanation-${idx}`}
+                        className="block text-gray-400 text-sm font-medium mb-1"
+                      >
+                        Explanation {idx + 1} (Optional):
+                      </label>
+                      <textarea
+                        id={`sampleExplanation-${idx}`}
+                        placeholder="Explanation for sample test case"
+                        rows={2}
+                        value={sample.explanation}
+                        onChange={(e) =>
+                          handleSampleTestCaseChange(
+                            idx,
+                            "explanation",
+                            e.target.value
+                          )
+                        }
+                        className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
                     <Button
                       type="button"
                       variant="destructive"
-                      onClick={() => removeTestCase(idx)}
+                      onClick={() => removeSampleTestCase(idx)}
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 mt-2"
+                    >
+                      Remove Sample
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addSampleTestCase}
+                  className="w-full py-2 border-dashed border-blue-500 text-blue-400 hover:bg-blue-900/20"
+                >
+                  Add Sample Test Case
+                </Button>
+                {errors.sampleTestCases && (
+                  <p className="text-red-400 text-sm mt-2">
+                    {errors.sampleTestCases}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="constraints"
+                  className="block text-gray-300 text-sm font-semibold mb-2"
+                >
+                  Constraints:
+                </label>
+                <textarea
+                  id="constraints"
+                  name="constraints"
+                  value={form.constraints}
+                  onChange={handleChange}
+                  rows="3"
+                  className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
+                    errors.constraints ? "border-red-500" : "border-gray-600"
+                  } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                ></textarea>
+                {errors.constraints && (
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.constraints}
+                  </p>
+                )}
+              </div>
+
+              {/* NEW: Time and Memory Limits */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label
+                    htmlFor="timeLimit"
+                    className="block text-gray-300 text-sm font-semibold mb-2"
+                  >
+                    Time Limit (milliseconds):
+                  </label>
+                  <input
+                    type="number"
+                    id="timeLimit"
+                    name="timeLimit"
+                    value={form.timeLimit}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
+                      errors.timeLimit ? "border-red-500" : "border-gray-600"
+                    } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    min="1"
+                    step="1"
+                    required
+                  />
+                  {errors.timeLimit && (
+                    <p className="text-red-400 text-sm mt-1">
+                      {errors.timeLimit}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label
+                    htmlFor="memoryLimit"
+                    className="block text-gray-300 text-sm font-semibold mb-2"
+                  >
+                    Memory Limit (MB):
+                  </label>
+                  <input
+                    type="number"
+                    id="memoryLimit"
+                    name="memoryLimit"
+                    value={form.memoryLimit}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
+                      errors.memoryLimit ? "border-red-500" : "border-gray-600"
+                    } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    min="1"
+                    step="1"
+                    required
+                  />
+                  {errors.memoryLimit && (
+                    <p className="text-red-400 text-sm mt-1">
+                      {errors.memoryLimit}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="difficulty"
+                  className="block text-gray-300 text-sm font-semibold mb-2"
+                >
+                  Difficulty:
+                </label>
+                <select
+                  id="difficulty"
+                  name="difficulty"
+                  value={form.difficulty}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
+                    errors.difficulty ? "border-red-500" : "border-gray-600"
+                  } text-white focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  required
+                >
+                  <option value="Easy">Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Hard">Hard</option>
+                </select>
+                {errors.difficulty && (
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.difficulty}
+                  </p>
+                )}
+              </div>
+
+              {/* NEW: Editorial Section */}
+              <div>
+                <label
+                  htmlFor="editorial"
+                  className="block text-gray-300 text-sm font-semibold mb-2"
+                >
+                  Editorial:
+                </label>
+                <textarea
+                  id="editorial"
+                  name="editorial"
+                  value={form.editorial}
+                  onChange={handleChange}
+                  rows="8"
+                  placeholder="Provide a detailed editorial for the problem solution..."
+                  className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
+                    errors.editorial ? "border-red-500" : "border-gray-600"
+                  } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  required
+                ></textarea>
+                {errors.editorial && (
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.editorial}
+                  </p>
+                )}
+              </div>
+
+              {/* NEW: Hints Section */}
+              <div
+                className={`border rounded-lg p-5 bg-gray-800/50 ${
+                  errors.hints ? "border-red-500" : "border-gray-600"
+                }`}
+              >
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  Hints (Optional)
+                </h3>
+                {form.hints.map((hint, idx) => (
+                  <div
+                    key={`hint-${idx}`}
+                    className="flex gap-4 mb-4 items-center"
+                  >
+                    <textarea
+                      id={`hint-${idx}`}
+                      placeholder={`Hint ${idx + 1}`}
+                      rows={2}
+                      value={hint}
+                      onChange={(e) => handleHintChange(idx, e.target.value)}
+                      className="flex-1 px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => removeHint(idx)}
                       className="bg-red-600 hover:bg-red-700 text-white px-4 py-2"
                     >
                       Remove
                     </Button>
                   </div>
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={addTestCase}
-                className="w-full py-2 border-dashed border-blue-500 text-blue-400 hover:bg-blue-900/20"
-              >
-                Add Hidden Test Case
-              </Button>
-              {errors.testCases && (
-                <p className="text-red-400 text-sm mt-2">{errors.testCases}</p>
-              )}
-            </div>
-
-            {/* NEW: Is Published Checkbox */}
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="isPublished"
-                name="isPublished"
-                checked={form.isPublished}
-                onChange={handleChange}
-                className="form-checkbox h-5 w-5 text-purple-600 transition duration-150 ease-in-out bg-gray-700 border-gray-500 rounded"
-              />
-              <label
-                htmlFor="isPublished"
-                className="text-gray-300 text-base font-semibold cursor-pointer"
-              >
-                Publish Problem Immediately
-              </label>
-              <p className="text-gray-400 text-sm ml-4">
-                (Unchecked means it will remain a draft)
-              </p>
-            </div>
-            {errors.isPublished && (
-              <p className="text-red-400 text-sm mt-1">{errors.isPublished}</p>
-            )}
-
-            <div className="flex justify-end gap-4 mt-8">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => navigate("/problems")}
-                className="px-6 py-3"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                className={`px-6 py-3 ${
-                  isSubmitting
-                    ? "bg-gray-600 cursor-not-allowed"
-                    : "bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 shadow-lg"
-                }`}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center justify-center">
-                    <svg
-                      className="animate-spin h-5 w-5 mr-3 text-white"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Updating...
-                  </div>
-                ) : (
-                  "Update Problem"
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addHint}
+                  className="w-full py-2 border-dashed border-blue-500 text-blue-400 hover:bg-blue-900/20"
+                >
+                  Add Hint
+                </Button>
+                {errors.hints && (
+                  <p className="text-red-400 text-sm mt-2">{errors.hints}</p>
                 )}
-              </Button>
-            </div>
-          </form>
-        </Card>
-      </motion.div>
-    </div>
+              </div>
+
+              {/* NEW: Starter Code Section */}
+              <div>
+                <label
+                  htmlFor="starterCodeCpp"
+                  className="block text-gray-300 text-sm font-semibold mb-2"
+                >
+                  Starter Code (C++):
+                </label>
+                <textarea
+                  id="starterCodeCpp"
+                  name="starterCodeCpp"
+                  value={form.starterCode.cpp}
+                  onChange={(e) =>
+                    handleStarterCodeChange("cpp", e.target.value)
+                  }
+                  rows="10"
+                  placeholder="Provide starter code for C++ (e.g., function signature, boilerplate code)"
+                  className={`w-full px-4 py-2 rounded-lg bg-gray-700 border ${
+                    errors["starterCode.cpp"]
+                      ? "border-red-500"
+                      : "border-gray-600"
+                  } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm`}
+                  required
+                ></textarea>
+                {errors["starterCode.cpp"] && (
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors["starterCode.cpp"]}
+                  </p>
+                )}
+              </div>
+
+              {/* Test Cases Section */}
+              <div
+                className={`border rounded-lg p-5 bg-gray-800/50 ${
+                  errors.testCases ? "border-red-500" : "border-gray-600"
+                }`}
+              >
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  Hidden Test Cases (Private)
+                </h3>
+                {form.testCases.map((tc, idx) => (
+                  <div
+                    key={`hidden-${idx}`}
+                    className="flex flex-col md:flex-row gap-4 mb-4 p-4 border border-gray-700 rounded-lg bg-gray-700/50"
+                  >
+                    <div className="flex-1">
+                      <label
+                        htmlFor={`input-${idx}`}
+                        className="block text-gray-400 text-sm font-medium mb-1"
+                      >
+                        Input {idx + 1}:
+                      </label>
+                      <textarea
+                        id={`input-${idx}`}
+                        placeholder="Test Case Input"
+                        rows={2}
+                        value={tc.input}
+                        onChange={(e) =>
+                          handleTestCaseChange(idx, "input", e.target.value)
+                        }
+                        className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label
+                        htmlFor={`output-${idx}`}
+                        className="block text-gray-400 text-sm font-medium mb-1"
+                      >
+                        Expected Output {idx + 1}:
+                      </label>
+                      <textarea
+                        id={`output-${idx}`}
+                        placeholder="Expected Output"
+                        rows={2}
+                        value={tc.output}
+                        onChange={(e) =>
+                          handleTestCaseChange(idx, "output", e.target.value)
+                        }
+                        className="w-full px-3 py-2 rounded-md bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="flex items-end justify-between md:justify-start gap-4 mt-2 md:mt-0">
+                      <label
+                        htmlFor={`isPublic-${idx}`}
+                        className="flex items-center text-gray-300 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          id={`isPublic-${idx}`}
+                          checked={tc.isPublic}
+                          onChange={(e) =>
+                            handleTestCaseChange(
+                              idx,
+                              "isPublic",
+                              e.target.checked
+                            )
+                          }
+                          className="form-checkbox h-4 w-4 text-blue-500 transition duration-150 ease-in-out bg-gray-700 border-gray-500 rounded"
+                        />
+                        <span className="ml-2 text-sm">Make Public</span>
+                      </label>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => removeTestCase(idx)}
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addTestCase}
+                  className="w-full py-2 border-dashed border-blue-500 text-blue-400 hover:bg-blue-900/20"
+                >
+                  Add Hidden Test Case
+                </Button>
+                {errors.testCases && (
+                  <p className="text-red-400 text-sm mt-2">
+                    {errors.testCases}
+                  </p>
+                )}
+              </div>
+
+              {/* NEW: Is Published Checkbox */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="isPublished"
+                  name="isPublished"
+                  checked={form.isPublished}
+                  onChange={handleChange}
+                  className="form-checkbox h-5 w-5 text-purple-600 transition duration-150 ease-in-out bg-gray-700 border-gray-500 rounded"
+                />
+                <label
+                  htmlFor="isPublished"
+                  className="text-gray-300 text-base font-semibold cursor-pointer"
+                >
+                  Publish Problem Immediately
+                </label>
+                <p className="text-gray-400 text-sm ml-4">
+                  (Unchecked means it will remain a draft)
+                </p>
+              </div>
+              {errors.isPublished && (
+                <p className="text-red-400 text-sm mt-1">
+                  {errors.isPublished}
+                </p>
+              )}
+
+              <div className="flex justify-end gap-4 mt-8">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => navigate("/problems")}
+                  className="px-6 py-3"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className={`px-6 py-3 ${
+                    isSubmitting
+                      ? "bg-gray-600 cursor-not-allowed"
+                      : "bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 shadow-lg"
+                  }`}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center">
+                      <svg
+                        className="animate-spin h-5 w-5 mr-3 text-white"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Updating...
+                    </div>
+                  ) : (
+                    "Update Problem"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </motion.div>
+      </div>
+    </>
   );
 }

@@ -14,9 +14,22 @@ const handleSubmission = async (req, res) => {
       .json({ error: "Missing required fields for submission." });
   }
 
+   let problemDocument; // Declare problemDocument here to make it accessible
+    try {
+        // 1. FIND THE PROBLEM BY SLUG
+        problemDocument = await Problem.findOne({ slug: problemId });
+        if (!problemDocument) {
+            console.error(`Problem with slug ${problemId} not found.`);
+            return res.status(404).json({ error: "Problem not found with the provided identifier." });
+        }
+    } catch (err) {
+        console.error("Error finding problem by slug:", err);
+        return res.status(500).json({ error: "Failed to retrieve problem details due to a server error." });
+    }
+
   const submission = new Submission({
     user: userId,
-    problem: problemId,
+    problem: problemDocument._id,
     code,
     language,
     verdict: "Pending",
@@ -39,19 +52,7 @@ const handleSubmission = async (req, res) => {
 
   try {
     // Fetch problem details from the Main Backend's database
-    const problem = await Problem.findById(problemId);
-    if (!problem) {
-      console.error(
-        `Problem ${problemId} not found for submission ${savedSubmission._id}`
-      );
-      savedSubmission.verdict = "Error";
-      savedSubmission.errorMessage =
-        "Associated problem not found for judging.";
-      await savedSubmission.save();
-      return res
-        .status(404)
-        .json({ success: false, error: "Problem not found for submission." });
-    }
+    const problem = problemDocument;
 
     // Prepare the problemDetails object to send to the Compiler Backend
     const problemDetailsToSend = {
@@ -219,7 +220,7 @@ const getAllSubmissions = async (req, res) => {
   try {
     const submissions = await Submission.find()
       .populate("user", "username")
-      .populate("problem", "title")
+      .populate("problem", "title slug")
       .sort({ submittedAt: -1 });
     res.json({ success: true, submissions });
   } catch (err) {
@@ -259,7 +260,7 @@ const getSubmissionById = async (req, res) => {
 
     const submission = await Submission.findById(id).populate(
       "problem",
-      "title description"
+      "title description slug"
     );
 
     if (!submission) {

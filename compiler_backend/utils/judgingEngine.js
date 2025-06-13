@@ -48,7 +48,7 @@ console.log("Judging Engine received problemDetails:", problemDetails);
 
             try {
                 inputPath = await generateInputFile(testCase.input);
-                const executionResult = await executeCpp(language, codeFilePath, inputPath, false, timeLimit, memoryLimit);
+                const executionResult = await executeCpp(language, codeFilePath, inputPath, timeLimit, memoryLimit);
 
                 actualOutput = (executionResult.output || '').trim();
                 details = executionResult.error;

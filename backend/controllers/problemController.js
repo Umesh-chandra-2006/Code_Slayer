@@ -202,9 +202,9 @@ exports.getallproblems = async (req, res) => {
   }
 };
 
-exports.getproblembyId = async (req, res) => {
+exports.getproblembySlug = async (req, res) => {
   try {
-    const problem = await Problem.findById(req.params.id);
+    const problem = await Problem.findOne({ slug: req.params.slug }).lean();
     if (!problem) return res.status(404).json({ message: "Problem not found" });
 
     // For non-admin users, if the problem is not published, return 404
@@ -218,10 +218,27 @@ exports.getproblembyId = async (req, res) => {
     } else {
       problem.acceptanceRate = 0;
     }
+    if (problem.testCases && (req.user === undefined || req.user.role !== "admin")) {
+      problem.testCases = problem.testCases.map((testCase) => {
+        const filteredTestCase = {
+          // Always include non-sensitive fields like isPublic, and any label if you have one
+          isPublic: testCase.isPublic,
+          label: testCase.label, // Assuming you might have a 'label' field for test cases
+        };
 
+        // Only include sensitive fields if the test case is public
+        if (testCase.isPublic) {
+          filteredTestCase._id = testCase._id; // Include ID for public ones
+          filteredTestCase.input = testCase.input;
+          filteredTestCase.output = testCase.output;
+        }
+
+        return filteredTestCase;
+      });
+    }
     res.status(200).json(problem);
   } catch (err) {
-    console.error("Error in getproblembyId:", err);
+    console.error("Error in getproblembySlug:", err);
     res
       .status(500)
       .json({ message: "Failed to fetch problem", error: err.message });
@@ -342,7 +359,7 @@ exports.createproblem = async (req, res) => {
 
 exports.updateproblem = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { slug } = req.params;
     let {
       title,
       description,
@@ -363,7 +380,7 @@ exports.updateproblem = async (req, res) => {
 
     tags = tags && tags.length > 0 ? normalizeTags(tags) : [];
 
-    const problem = await Problem.findById(id);
+    const problem = await Problem.findOne({ slug });
     if (!problem) {
       return res.status(404).json({ message: "Problem not found" });
     }
@@ -443,11 +460,15 @@ exports.updateproblem = async (req, res) => {
       };
     }
 
-    const updatedProblem = await Problem.findByIdAndUpdate(id, updateFields, {
-      new: true,
-      runValidators: true,
-      context: "query",
-    });
+    const updatedProblem = await Problem.findOneAndUpdate(
+      { slug },
+      updateFields,
+      {
+        new: true,
+        runValidators: true,
+        context: "query",
+      }
+    );
 
     // If tags were provided in the update, process them
     if (tags && tags.length > 0) {
@@ -501,9 +522,9 @@ exports.updateproblem = async (req, res) => {
 
 exports.deleteproblem = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { slug } = req.params;
 
-    const problem = await Problem.findById(id);
+    const problem = await Problem.findOne({ slug });
     if (!problem) {
       return res.status(404).json({ message: "Problem not found" });
     }

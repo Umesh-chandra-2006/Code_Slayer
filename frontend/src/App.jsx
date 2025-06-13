@@ -39,7 +39,7 @@ function App() {
         >
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/problems" element={<ProblemList />} />
-          <Route path="/problems/:id" element={<ViewProblem />} />
+          <Route path="/problems/:slug" element={<ViewProblem />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/editor" element={<CodeEditor />} />
           <Route path="/submissions" element={<SubmissionHistory />} />

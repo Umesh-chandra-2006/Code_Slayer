@@ -3,7 +3,7 @@ const router = express.Router();
 const { apiLimiter } = require("../middleware/rateLimitMiddleware");
 const {
   getallproblems,
-  getproblembyId,
+  getproblembySlug,
   createproblem,
   updateproblem,
   deleteproblem,
@@ -14,9 +14,9 @@ const { isAuthenticated, isAdmin } = require("../middleware/authMiddleware");
 
 router.get("/", isAuthenticated, apiLimiter, getallproblems);
 router.get("/tags", isAuthenticated, apiLimiter, getalltags);
-router.get("/:id", isAuthenticated, apiLimiter, getproblembyId);
+router.get("/:slug", isAuthenticated, apiLimiter, getproblembySlug);
 router.post("/", isAuthenticated, isAdmin, apiLimiter, createproblem);
-router.put("/:id", isAuthenticated, isAdmin, apiLimiter, updateproblem);
-router.delete("/:id", isAuthenticated, isAdmin, apiLimiter, deleteproblem);
+router.put("/:slug", isAuthenticated, isAdmin, apiLimiter, updateproblem);
+router.delete("/:slug", isAuthenticated, isAdmin, apiLimiter, deleteproblem);
 
 module.exports = router;
