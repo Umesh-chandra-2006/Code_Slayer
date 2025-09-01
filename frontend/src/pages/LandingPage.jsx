@@ -247,6 +247,49 @@ export default function LandingPage() {
           </div>
         </div>
 
+        {/* About Section */}
+        <div className="py-20 bg-gray-800/80">
+          <div className="container mx-auto px-6">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              className="max-w-4xl mx-auto text-center"
+            >
+              <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-8 leading-tight">
+                About{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                  CodeSlayer
+                </span>
+              </h2>
+              <div className="bg-gray-900/60 p-8 md:p-12 rounded-3xl shadow-xl border border-gray-700 backdrop-blur-sm">
+                <p className="text-lg md:text-xl text-gray-300 leading-relaxed mb-6">
+                  <span className="font-bold text-white">CodeSlayer</span> is a full-stack coding platform inspired by sites like LeetCode and HackerRank. 
+                  It provides a modern online environment for coding practice, problem-solving, and code compilation.
+                </p>
+                <p className="text-lg md:text-xl text-gray-300 leading-relaxed mb-8">
+                  The platform features JWT-based authentication, a sleek and responsive UI, and a real-time code editor and compiler, 
+                  making it the perfect place to sharpen your programming skills and tackle algorithmic challenges.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                  <div className="p-4">
+                    <div className="text-2xl font-bold text-blue-400 mb-2">Real-time</div>
+                    <div className="text-sm text-gray-400">Code compilation and execution</div>
+                  </div>
+                  <div className="p-4">
+                    <div className="text-2xl font-bold text-purple-400 mb-2">Secure</div>
+                    <div className="text-sm text-gray-400">JWT-based authentication</div>
+                  </div>
+                  <div className="p-4">
+                    <div className="text-2xl font-bold text-green-400 mb-2">Modern</div>
+                    <div className="text-sm text-gray-400">Responsive and intuitive UI</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
         {/* CTA Section */}
         <div className="py-20 bg-gray-900/80 backdrop-blur-sm relative z-0">
           <div
